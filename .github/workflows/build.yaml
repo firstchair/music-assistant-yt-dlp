@@ -4,10 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - "youtube_provider/**"
       - "music_assistant_youtube/**"
       - ".github/workflows/build.yaml"
-      - ".upstream-version"
+  release:
+    types: [published]
   workflow_dispatch:
 
 env:
@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     strategy:
       matrix:
@@ -32,10 +32,11 @@ jobs:
         id: version
         run: |
           if [ -f .upstream-version ]; then
-            echo "tag=$(cat .upstream-version)" >> "$GITHUB_OUTPUT"
+            VERSION=$(cat .upstream-version)
           else
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
+            VERSION="latest"
           fi
+          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -57,9 +58,6 @@ jobs:
           ARCH="${PLATFORM#linux/}"
           echo "arch=$ARCH" >> "$GITHUB_OUTPUT"
 
-      - name: Copy provider into build context
-        run: cp -r youtube_provider music_assistant_youtube/youtube_provider
-
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -74,3 +72,33 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/music-assistant-yt-dlp/${{ steps.arch.outputs.arch }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create release for provider changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(cat .upstream-version)
+          # Append a patch suffix based on short SHA to distinguish provider-only rebuilds
+          TAG="${VERSION}-patch.$(git rev-parse --short HEAD)"
+
+          # Update config.yaml to match the new tag
+          sed -i "s/^version:.*/version: ${TAG}/" music_assistant_youtube/config.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add music_assistant_youtube/config.yaml
+          git commit -m "chore: bump version to ${TAG}" || true
+          git push || true
+
+          gh release create "$TAG" \
+            --title "Provider update $TAG" \
+            --notes "Provider code change rebuild based on upstream Music Assistant \`$VERSION\`." \
+            --latest

@@ -129,4 +129,5 @@ jobs:
           gh release create "$VERSION" \
             --title "Music Assistant yt-dlp $VERSION" \
             --notes "Music provider code change, rebuild based on upstream Music Assistant \`$BASE_TAG\`." \
+            --generate-notes \
             --latest

@@ -77,4 +77,5 @@ jobs:
           gh release create "$UPSTREAM_VERSION" \
             --title "Music Assistant $UPSTREAM_VERSION" \
             --notes "Automated rebuild tracking upstream Music Assistant server release \`$UPSTREAM_VERSION\`." \
+            --generate-notes \
             --latest

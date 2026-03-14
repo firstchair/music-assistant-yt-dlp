@@ -30,11 +30,16 @@ jobs:
 
       - name: Determine upstream version
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          VERSION=""
           if [ -f .upstream-version ]; then
             VERSION=$(cat .upstream-version)
-          else
-            VERSION="latest"
+          fi
+          # Never use "latest" as a version tag — resolve it to an actual release
+          if [ -z "$VERSION" ] || [ "$VERSION" = "latest" ]; then
+            VERSION=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
           fi
           echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 

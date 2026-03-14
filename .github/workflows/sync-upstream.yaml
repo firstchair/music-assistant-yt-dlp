@@ -56,13 +56,16 @@ jobs:
           # Update the add-on config version to match upstream
           sed -i "s/^version:.*/version: ${UPSTREAM_VERSION}/" music_assistant_youtube/config.yaml
 
+          # Update build.yaml base image tags
+          sed -i "s|ghcr.io/music-assistant/server:[^ ]*|ghcr.io/music-assistant/server:${UPSTREAM_VERSION}|g" music_assistant_youtube/build.yaml
+
       - name: Commit version bump
         env:
           UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .upstream-version music_assistant_youtube/config.yaml
+          git add .upstream-version music_assistant_youtube/config.yaml music_assistant_youtube/build.yaml
           git commit -m "chore: bump upstream MA to ${UPSTREAM_VERSION}"
           git push
 

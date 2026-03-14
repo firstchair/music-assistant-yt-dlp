@@ -12,7 +12,7 @@ A Home Assistant add-on that packages the [Music Assistant](https://music-assist
    ```
 4. Find **Music Assistant Server (YouTube)** in the add-on store and install it
 
-> **Note:** This add-on replaces the official Music Assistant add-on. Do not run both simultaneously — they use the same port (8095).
+> **Note:** This add-on replaces the official Music Assistant add-on. Do not run both simultaneously — they use the same port (8094).
 
 ## How It Works
 

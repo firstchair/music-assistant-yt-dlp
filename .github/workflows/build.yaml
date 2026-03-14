@@ -1,0 +1,76 @@
+name: Build and Publish Container
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "youtube_provider/**"
+      - "music_assistant_youtube/**"
+      - ".github/workflows/build.yaml"
+      - ".upstream-version"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/aarch64
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine upstream version
+        id: version
+        run: |
+          if [ -f .upstream-version ]; then
+            echo "tag=$(cat .upstream-version)" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract arch suffix
+        id: arch
+        run: |
+          PLATFORM="${{ matrix.platform }}"
+          ARCH="${PLATFORM#linux/}"
+          echo "arch=$ARCH" >> "$GITHUB_OUTPUT"
+
+      - name: Copy provider into build context
+        run: cp -r youtube_provider music_assistant_youtube/youtube_provider
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: music_assistant_youtube
+          file: music_assistant_youtube/Dockerfile
+          platforms: ${{ matrix.platform }}
+          push: true
+          build-args: |
+            BUILD_FROM=ghcr.io/music-assistant/server:${{ steps.version.outputs.tag }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/music-assistant-yt-dlp/${{ steps.arch.outputs.arch }}:${{ steps.version.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/music-assistant-yt-dlp/${{ steps.arch.outputs.arch }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

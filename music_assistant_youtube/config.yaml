@@ -1,0 +1,28 @@
+name: Music Assistant Server (YouTube)
+version: 1.0.0
+slug: music_assistant_youtube
+description: Music Assistant Server with YouTube provider (yt-dlp) injected
+url: https://github.com/giantorth/music-assistant-yt-dlp
+arch:
+  - amd64
+  - aarch64
+startup: services
+boot: auto
+init: false
+hassio_api: true
+hassio_role: manager
+homeassistant_api: true
+ingress: true
+ingress_port: 8095
+panel_icon: mdi:music
+ports:
+  8095/tcp: 8095
+ports_description:
+  8095/tcp: Music Assistant web interface
+map:
+  - addon_config:rw
+options:
+  log_level: info
+schema:
+  log_level: list(trace|debug|info|warning|error|critical)?
+image: ghcr.io/giantorth/music-assistant-yt-dlp/{arch}

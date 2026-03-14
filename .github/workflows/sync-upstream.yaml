@@ -1,0 +1,73 @@
+name: Sync Upstream MA Release
+
+on:
+  schedule:
+    # Check for new upstream releases every 6 hours
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    outputs:
+      new_release: ${{ steps.check.outputs.new_release }}
+      upstream_version: ${{ steps.check.outputs.upstream_version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get latest upstream MA server release
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Get the latest release tag from upstream
+          UPSTREAM_VERSION=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
+          echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+
+          # Read the version we last built against
+          CURRENT_VERSION=""
+          if [ -f .upstream-version ]; then
+            CURRENT_VERSION=$(cat .upstream-version)
+          fi
+
+          if [ "$UPSTREAM_VERSION" != "$CURRENT_VERSION" ]; then
+            echo "new_release=true" >> "$GITHUB_OUTPUT"
+            echo "New upstream release detected: $UPSTREAM_VERSION (was: $CURRENT_VERSION)"
+          else
+            echo "new_release=false" >> "$GITHUB_OUTPUT"
+            echo "Already up to date: $CURRENT_VERSION"
+          fi
+
+  update-and-build:
+    needs: check-upstream
+    if: needs.check-upstream.outputs.new_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update tracked version
+        env:
+          UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
+        run: |
+          echo "$UPSTREAM_VERSION" > .upstream-version
+
+          # Update the add-on config version to match upstream
+          sed -i "s/^version:.*/version: ${UPSTREAM_VERSION}/" music_assistant_youtube/config.yaml
+
+      - name: Commit version bump
+        env:
+          UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .upstream-version music_assistant_youtube/config.yaml
+          git commit -m "chore: bump upstream MA to ${UPSTREAM_VERSION}"
+          git push
+
+      - name: Trigger container build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run build.yaml

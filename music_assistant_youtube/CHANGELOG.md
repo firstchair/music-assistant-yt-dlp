@@ -1,3 +1,6 @@
+## 2.8.1-patch.47be7c5
+- Upstream pipeline fix
+
 ## 2.8.1
 - Upstream Music Assistant server update to 2.8.1
 

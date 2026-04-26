@@ -1,3 +1,47 @@
+## 2.9.0b9
+- Upstream Music Assistant server update to 2.9.0b9
+
+### Upstream Release Notes
+## 📦 Beta Release
+
+_Changes since [2.9.0b8](https://github.com/music-assistant/server/releases/tag/2.9.0b8)_
+
+### 🚀 Features and enhancements
+
+- Improve TuneIn browse, search and add recommendations (by @dmoo500 in #3764)
+- Add recommendation translation keys for QQ and NetEase (by @xiasi0 in #3778)
+- Revert "AirPlay 2 provider now supports sync" (by @MarvinSchenkel in #3780)
+
+### 🐛 Bugfixes
+
+- Force imageproxy over streamserver for Airplay artwork (by @MarvinSchenkel in #3763)
+- Fix tidal recommendations (by @jozefKruszynski in #3767)
+- Change heartbeat of websocket and sendspin proxy socket to 25s (by @MarvinSchenkel in #3769)
+- Fix 30s delay after switching tracks on Sendspin (by @maximmaxim345 in #3777)
+
+### 🎨 Frontend Changes
+
+- Remove size restriction for volume slider + refacto old ui for player controls (by @stvncode in [#1726](https://github.com/music-assistant/frontend/pull/1726))
+
+### 🧰 Maintenance and dependency bumps
+
+<details>
+<summary>5 changes</summary>
+
+- Bump ya-passport-auth to 1.3.0 for Yandex Smart Home provider (by @trudenboy in #3746)
+- Consolidate tidal constants for urls and paths (by @jozefKruszynski in #3768)
+- Resolve TODOs in metadata controller (by @OzGav in #3771)
+- Remove code in the config controller commented for removal post the 2.8 release  (by @OzGav in #3772)
+- ⬆️ Update music-assistant-frontend to 2.17.152 (by @music-assistant-machine in #3775)
+
+</details>
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @dmoo500, @jozefKruszynski, @maximmaxim345, @stvncode, @trudenboy, @xiasi0
+
 ## 2.8.6
 - Upstream Music Assistant server update to 2.8.6
 

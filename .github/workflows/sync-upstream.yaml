@@ -1,4 +1,4 @@
-name: Sync Upstream MA Release
+name: Sync Upstream MA Release (beta channel)
 
 on:
   schedule:
@@ -16,19 +16,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get latest upstream MA server release
+      - name: Get latest upstream MA server release (beta channel)
         id: check
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Get the latest release tag and notes from upstream
-          UPSTREAM_VERSION=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
+          # Track BETA channel: latest release of any kind (stable or beta), but skip
+          # daily ".dev" builds — those are too unstable for an add-on.
+          # Releases endpoint returns sorted by published_at desc; pick the first one
+          # that is not a draft and is not a .dev build.
+          UPSTREAM_VERSION=$(gh api 'repos/music-assistant/server/releases?per_page=30' \
+            --jq '[.[] | select(.draft == false) | select(.tag_name | test("\\.dev") | not)] | .[0].tag_name')
+
+          if [ -z "$UPSTREAM_VERSION" ] || [ "$UPSTREAM_VERSION" = "null" ]; then
+            echo "Failed to resolve upstream version" >&2
+            exit 1
+          fi
           echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
 
           # Capture upstream release notes (use delimiter for multiline)
           EOF_MARKER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "upstream_notes<<$EOF_MARKER" >> "$GITHUB_OUTPUT"
-          gh api repos/music-assistant/server/releases/latest --jq '.body' >> "$GITHUB_OUTPUT"
+          gh api "repos/music-assistant/server/releases/tags/$UPSTREAM_VERSION" --jq '.body' >> "$GITHUB_OUTPUT"
           echo "$EOF_MARKER" >> "$GITHUB_OUTPUT"
 
           # Read the version we last built against

@@ -1,10 +1,14 @@
-# Music Assistant Server with YouTube Provider
+# Music Assistant Server with YouTube Provider — Beta Channel Fork
+
+> **Fork of [giantorth/music-assistant-yt-dlp](https://github.com/giantorth/music-assistant-yt-dlp)** that tracks the **Music Assistant beta channel** instead of stable, plus custom feature additions (daily playlist, etc.).
+>
+> Upstream is auto-synced for MA version bumps; provider code changes from upstream require a manual `git merge upstream/main`.
 
 A Home Assistant add-on that packages the [Music Assistant](https://music-assistant.io/) server with a YouTube provider powered by yt-dlp.
 
 ## Installation
 
-[![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fgiantorth%2Fmusic-assistant-yt-dlp)
+[![Add to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Ffirstchair%2Fmusic-assistant-yt-dlp)
 
 Or manually:
 
@@ -12,7 +16,7 @@ Or manually:
 2. Click the three-dot menu (top right) and select **Repositories**
 3. Add this repository URL:
    ```
-   https://github.com/giantorth/music-assistant-yt-dlp
+   https://github.com/firstchair/music-assistant-yt-dlp
    ```
 4. Find **Music Assistant Server (YouTube)** in the add-on store and install it
 
@@ -23,6 +27,18 @@ Or manually:
 - The official `ghcr.io/music-assistant/server` image is used as a base
 - The YouTube provider is copied into the container's providers directory at build time
 - A GitHub Actions workflow checks for new upstream MA releases every 6 hours and rebuilds automatically
+- **This fork tracks the MA *beta* channel** (latest non-`.dev` release — beta or stable, whichever is newer). Upstream `giantorth/main` tracks stable only.
+
+## Syncing With Upstream giantorth
+
+This fork periodically receives MA version bumps automatically (via `sync-upstream.yaml`). To pull in upstream **provider code changes** (improvements giantorth makes to `youtube_provider/`), run manually:
+
+```bash
+git fetch upstream
+git merge upstream/main
+# resolve conflicts in youtube_provider/ if any, then:
+git push
+```
 
 ## Configuration
 

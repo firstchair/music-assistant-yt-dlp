@@ -8,8 +8,8 @@ A Home Assistant add-on repository that packages the [Music Assistant](https://m
 
 | Add-on | Tracks | MA channel | Image |
 |---|---|---|---|
-| **Music Assistant Server (YouTube)** | latest stable MA release | `releases/latest` (e.g. `2.8.6`) | `ghcr.io/firstchair/music-assistant-yt-dlp/<arch>` |
-| **Music Assistant Server (YouTube) BETA** | latest non-draft, non-`.dev` MA release | beta or stable, whichever is newer (e.g. `2.9.0b9`) | `ghcr.io/firstchair/music-assistant-yt-dlp-beta/<arch>` |
+| **Music Assistant Server (Firstchair)** | latest stable MA release | `releases/latest` (e.g. `2.8.6`) | `ghcr.io/firstchair/music-assistant-yt-dlp/<arch>` |
+| **Music Assistant Server (Firstchair) BETA** | latest non-draft, non-`.dev` MA release | beta or stable, whichever is newer (e.g. `2.9.0b9`) | `ghcr.io/firstchair/music-assistant-yt-dlp-beta/<arch>` |
 
 > Only **one** of the two can run at a time — they both bind to port 8094. Pick a channel, install that one, and uninstall the other if you switch.
 
@@ -22,7 +22,7 @@ Or manually:
 1. In Home Assistant, go to **Settings > Add-ons > Add-on Store**
 2. Click the three-dot menu (top right) and select **Repositories**
 3. Add: `https://github.com/firstchair/music-assistant-yt-dlp`
-4. Pick either **Music Assistant Server (YouTube)** (stable) or **Music Assistant Server (YouTube) BETA** and install
+4. Pick either **Music Assistant Server (Firstchair)** (stable) or **Music Assistant Server (Firstchair) BETA** and install
 
 > **Note:** Either variant replaces the official Music Assistant add-on. Do not run both simultaneously — they all use port 8094.
 

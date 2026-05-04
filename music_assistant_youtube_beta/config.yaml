@@ -1,5 +1,5 @@
 name: Music Assistant Server (Firstchair) BETA
-version: 2.9.0b9-patch.1340193
+version: 2.9.0b9-patch.ab24041
 slug: music_assistant_youtube_beta
 description: Music Assistant Server (BETA channel) with YouTube provider (yt-dlp) injected
 url: https://github.com/firstchair/music-assistant-yt-dlp

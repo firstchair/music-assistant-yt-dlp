@@ -50,6 +50,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      max-parallel: 1   # serialize git push to avoid races between addons
       matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
     outputs:
       version_stable: ${{ steps.version.outputs.version_stable }}
@@ -112,7 +113,14 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add "${ADDON_DIR}/config.yaml" || true
             git commit -m "chore(${ADDON_DIR}): bump version to ${VERSION}" || true
-            git push || true
+            # Retry push with rebase if upstream advanced (parallel matrix safety)
+            for i in 1 2 3; do
+              if git push; then
+                break
+              fi
+              echo "Push failed, rebasing and retrying ($i/3)"
+              git pull --rebase --autostash
+            done
           fi
 
   build:

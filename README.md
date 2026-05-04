@@ -1,10 +1,17 @@
-# Music Assistant Server with YouTube Provider — Beta Channel Fork
+# Music Assistant Server with YouTube Provider — Stable + Beta
 
-> **Fork of [giantorth/music-assistant-yt-dlp](https://github.com/giantorth/music-assistant-yt-dlp)** that tracks the **Music Assistant beta channel** instead of stable, plus custom feature additions (daily playlist, etc.).
->
-> Upstream is auto-synced for MA version bumps; provider code changes from upstream require a manual `git merge upstream/main`.
+> **Fork of [giantorth/music-assistant-yt-dlp](https://github.com/giantorth/music-assistant-yt-dlp)** that ships **two add-on variants** — one tracking the Music Assistant stable channel, one tracking the beta channel — plus custom feature additions (daily playlist, etc.).
 
-A Home Assistant add-on that packages the [Music Assistant](https://music-assistant.io/) server with a YouTube provider powered by yt-dlp.
+A Home Assistant add-on repository that packages the [Music Assistant](https://music-assistant.io/) server with a YouTube provider powered by yt-dlp. Both variants share the same YouTube provider code (`youtube_provider/` at repo root); only the underlying MA base image differs.
+
+## Add-ons in this repository
+
+| Add-on | Tracks | MA channel | Image |
+|---|---|---|---|
+| **Music Assistant Server (YouTube)** | latest stable MA release | `releases/latest` (e.g. `2.8.6`) | `ghcr.io/firstchair/music-assistant-yt-dlp/<arch>` |
+| **Music Assistant Server (YouTube) BETA** | latest non-draft, non-`.dev` MA release | beta or stable, whichever is newer (e.g. `2.9.0b9`) | `ghcr.io/firstchair/music-assistant-yt-dlp-beta/<arch>` |
+
+> Only **one** of the two can run at a time — they both bind to port 8094. Pick a channel, install that one, and uninstall the other if you switch.
 
 ## Installation
 
@@ -14,31 +21,19 @@ Or manually:
 
 1. In Home Assistant, go to **Settings > Add-ons > Add-on Store**
 2. Click the three-dot menu (top right) and select **Repositories**
-3. Add this repository URL:
-   ```
-   https://github.com/firstchair/music-assistant-yt-dlp
-   ```
-4. Find **Music Assistant Server (YouTube)** in the add-on store and install it
+3. Add: `https://github.com/firstchair/music-assistant-yt-dlp`
+4. Pick either **Music Assistant Server (YouTube)** (stable) or **Music Assistant Server (YouTube) BETA** and install
 
-> **Note:** This add-on replaces the official Music Assistant add-on. Do not run both simultaneously — they use the same port (8094).
+> **Note:** Either variant replaces the official Music Assistant add-on. Do not run both simultaneously — they all use port 8094.
 
 ## How It Works
 
 - The official `ghcr.io/music-assistant/server` image is used as a base
-- The YouTube provider is copied into the container's providers directory at build time
-- A GitHub Actions workflow checks for new upstream MA releases every 6 hours and rebuilds automatically
-- **This fork tracks the MA *beta* channel** (latest non-`.dev` release — beta or stable, whichever is newer). Upstream `giantorth/main` tracks stable only.
-
-## Syncing With Upstream giantorth
-
-This fork periodically receives MA version bumps automatically (via `sync-upstream.yaml`). To pull in upstream **provider code changes** (improvements giantorth makes to `youtube_provider/`), run manually:
-
-```bash
-git fetch upstream
-git merge upstream/main
-# resolve conflicts in youtube_provider/ if any, then:
-git push
-```
+- `youtube_provider/` (at repo root) is copied into the container's providers directory at build time
+- Two GitHub Actions workflows watch upstream MA releases every 6 hours:
+  - `sync-upstream.yaml` → tracks **stable** (`releases/latest`), bumps `music_assistant_youtube/`
+  - `sync-upstream-beta.yaml` → tracks **beta** (latest non-`.dev`), bumps `music_assistant_youtube_beta/`
+- The `build.yaml` workflow uses a matrix to build both add-ons in parallel (4 jobs: 2 addons × 2 architectures)
 
 ## Configuration
 
@@ -46,24 +41,51 @@ Once installed, add the YouTube provider in Music Assistant under **Settings > P
 
 ### YouTube Data API Key
 
-Providing a [YouTube Data API v3](https://console.cloud.google.com/apis/credentials) key improves search reliability and metadata quality by using the official API instead of scraping. When configured, the provider uses the API for search and metadata lookups, falling back to yt-dlp automatically if the API is unavailable or quota is exceeded.
+Providing a [YouTube Data API v3](https://console.cloud.google.com/apis/credentials) key improves search reliability and metadata quality by using the official API instead of scraping.
 
 ### Artist Playlist Limit
 
-Controls the maximum number of channel playlists returned as albums per artist. Defaults to 25. Can be set between 1 and 100.
+Controls the maximum number of channel playlists returned as albums per artist. Defaults to 25.
 
 ### YouTube Cookies
 
-Paste your YouTube cookies to enable playback of age-restricted or member-only content. Two formats are accepted:
+Paste your YouTube cookies to enable playback of age-restricted or member-only content. Netscape/`cookies.txt` format or raw cookie header — both accepted. Leave empty for public content only.
 
-- **Netscape/cookies.txt format** — exported via a browser extension such as "Get cookies.txt LOCALLY" (Chrome/Edge) or "cookies.txt" (Firefox)
-- **Raw cookie header** — copied from browser DevTools (F12 > Network tab), e.g. `name1=val1; name2=val2`
+## Repo Layout
 
-Cookies may expire over time and need to be refreshed. Leave empty for public content only.
+```
+firstchair/music-assistant-yt-dlp/
+├── youtube_provider/                   # SOURCE OF TRUTH (committed)
+├── music_assistant_youtube/            # STABLE add-on (config + Dockerfile)
+│   ├── .upstream-version               # current stable MA version
+│   ├── config.yaml
+│   ├── build.yaml
+│   ├── Dockerfile
+│   ├── icon.png
+│   └── logo.png
+├── music_assistant_youtube_beta/       # BETA add-on
+│   └── (same structure, different versions)
+├── repository.yaml                     # HA add-on store metadata
+└── .github/workflows/
+    ├── sync-upstream.yaml              # stable channel
+    ├── sync-upstream-beta.yaml         # beta channel
+    └── build.yaml                      # builds both via matrix
+```
+
+The build workflow copies `youtube_provider/` into each addon dir before docker build (the in-addon copies are gitignored).
 
 ## Updating the YouTube Provider
 
-Edit the files in `music_assistant_youtube/youtube_provider/` and push to `main`. The build workflow will automatically rebuild and publish new container images.
+Edit `youtube_provider/` (at repo root) and push to `main`. The build workflow rebuilds **both** addons.
+
+## Syncing With Upstream giantorth
+
+```bash
+git fetch upstream
+git merge upstream/main
+# resolve conflicts (likely in youtube_provider/), then:
+git push
+```
 
 ## Architecture Support
 

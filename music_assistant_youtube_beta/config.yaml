@@ -1,7 +1,7 @@
-name: Music Assistant Server (YouTube)
-version: 2.8.6
-slug: music_assistant_youtube
-description: Music Assistant Server (stable) with YouTube provider (yt-dlp) injected
+name: Music Assistant Server (YouTube) BETA
+version: 2.9.0b9
+slug: music_assistant_youtube_beta
+description: Music Assistant Server (BETA channel) with YouTube provider (yt-dlp) injected
 url: https://github.com/firstchair/music-assistant-yt-dlp
 arch:
   - amd64
@@ -13,7 +13,7 @@ auth_api: true
 host_network: true
 ingress: true
 ingress_port: 8094
-panel_icon: mdi:bookshelf
+panel_icon: mdi:play-circle
 panel_title: Music Assistant
 panel_admin: false
 uart: false
@@ -27,8 +27,8 @@ backup_exclude:
   - cache.db
   - collage_images/*
   - .cache/*
-stage: stable
-image: ghcr.io/firstchair/music-assistant-yt-dlp/{arch}
+stage: experimental
+image: ghcr.io/firstchair/music-assistant-yt-dlp-beta/{arch}
 tmpfs: true
 options:
   log_level: info

@@ -5,97 +5,118 @@ on:
     branches: [main]
     paths:
       - "music_assistant_youtube/**"
+      - "music_assistant_youtube_beta/**"
+      - "youtube_provider/**"
       - ".github/workflows/build.yaml"
-  release:
-    types: [published]
   workflow_dispatch:
   workflow_call:
     inputs:
-      upstream_version:
-        description: "Upstream version passed by caller"
-        required: true
+      addon_dir:
+        description: "Build only this addon dir (default: build both)"
+        required: false
         type: string
+        default: ""
+      upstream_version:
+        description: "Upstream MA version to build against (overrides .upstream-version)"
+        required: false
+        type: string
+        default: ""
 
 env:
   REGISTRY: ghcr.io
 
 jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - id: set
+        env:
+          ADDON_DIR: ${{ inputs.addon_dir }}
+        run: |
+          if [ "$ADDON_DIR" = "music_assistant_youtube" ]; then
+            echo 'matrix={"addon":[{"dir":"music_assistant_youtube","image":"music-assistant-yt-dlp"}]}' >> "$GITHUB_OUTPUT"
+          elif [ "$ADDON_DIR" = "music_assistant_youtube_beta" ]; then
+            echo 'matrix={"addon":[{"dir":"music_assistant_youtube_beta","image":"music-assistant-yt-dlp-beta"}]}' >> "$GITHUB_OUTPUT"
+          else
+            # Default: build BOTH
+            echo 'matrix={"addon":[{"dir":"music_assistant_youtube","image":"music-assistant-yt-dlp"},{"dir":"music_assistant_youtube_beta","image":"music-assistant-yt-dlp-beta"}]}' >> "$GITHUB_OUTPUT"
+          fi
+
   prepare:
+    needs: matrix
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    strategy:
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      base_tag: ${{ steps.version.outputs.base_tag }}
-      commit_msg: ${{ steps.version.outputs.commit_msg }}
+      version_stable: ${{ steps.version.outputs.version_stable }}
+      version_beta: ${{ steps.version.outputs.version_beta }}
+      base_tag_stable: ${{ steps.version.outputs.base_tag_stable }}
+      base_tag_beta: ${{ steps.version.outputs.base_tag_beta }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Determine version
+      - name: Determine version for ${{ matrix.addon.dir }}
         id: version
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_VERSION: ${{ inputs.upstream_version }}
+          ADDON_DIR: ${{ matrix.addon.dir }}
         run: |
-          # If called with an explicit upstream version, use it directly
-          if [ -n "$INPUT_VERSION" ]; then
-            echo "base_tag=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
-            echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
-            echo "commit_msg=" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
+          # Read pinned MA version for this addon
           BASE=""
-          if [ -f .upstream-version ]; then
-            BASE=$(cat .upstream-version)
+          if [ -f "${ADDON_DIR}/.upstream-version" ]; then
+            BASE=$(cat "${ADDON_DIR}/.upstream-version")
           fi
-          # Never use "latest" — resolve to actual upstream release
-          if [ -z "$BASE" ] || [ "$BASE" = "latest" ]; then
-            BASE=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
-          fi
-          echo "base_tag=$BASE" >> "$GITHUB_OUTPUT"
 
-          # For push events (provider changes), append a patch suffix
-          # For release events (upstream bumps), use the upstream version as-is
+          # workflow_call may override with explicit upstream version
+          if [ -n "$INPUT_VERSION" ]; then
+            BASE="$INPUT_VERSION"
+          fi
+
+          # Fallback: detect from API
+          if [ -z "$BASE" ] || [ "$BASE" = "latest" ]; then
+            if [ "$ADDON_DIR" = "music_assistant_youtube" ]; then
+              BASE=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
+            else
+              BASE=$(gh api 'repos/music-assistant/server/releases?per_page=30' \
+                --jq '[.[] | select(.draft == false) | select(.tag_name | test("\\.dev") | not)] | .[0].tag_name')
+            fi
+          fi
+
+          # For push events (provider code changes), append a patch suffix
           if [ "${{ github.event_name }}" = "push" ]; then
             VERSION="${BASE}-patch.$(git rev-parse --short HEAD)"
-            # Capture the commit message that triggered this build
-            COMMIT_MSG=$(git log -1 --format='%s' HEAD)
           else
             VERSION="$BASE"
-            COMMIT_MSG=""
           fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "commit_msg=$COMMIT_MSG" >> "$GITHUB_OUTPUT"
 
-      - name: Update config.yaml and changelog
-        if: github.event_name == 'push'
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-          COMMIT_MSG: ${{ steps.version.outputs.commit_msg }}
-        run: |
-          sed -i "s/^version:.*/version: ${VERSION}/" music_assistant_youtube/config.yaml
-
-          # Prepend new entry to CHANGELOG.md
-          CHANGELOG="music_assistant_youtube/CHANGELOG.md"
-          ENTRY="## ${VERSION}\n- ${COMMIT_MSG}"
-          if [ -f "$CHANGELOG" ]; then
-            printf '%b\n\n' "$ENTRY" | cat - "$CHANGELOG" > "$CHANGELOG.tmp"
-            mv "$CHANGELOG.tmp" "$CHANGELOG"
+          # Output per addon (stable/beta)
+          if [ "$ADDON_DIR" = "music_assistant_youtube" ]; then
+            echo "base_tag_stable=$BASE" >> "$GITHUB_OUTPUT"
+            echo "version_stable=$VERSION" >> "$GITHUB_OUTPUT"
           else
-            printf '%b\n' "$ENTRY" > "$CHANGELOG"
+            echo "base_tag_beta=$BASE" >> "$GITHUB_OUTPUT"
+            echo "version_beta=$VERSION" >> "$GITHUB_OUTPUT"
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add music_assistant_youtube/config.yaml music_assistant_youtube/CHANGELOG.md
-          git commit -m "chore: bump version to ${VERSION}" || true
-          git push || true
+          # Bump config.yaml on push events (provider code changed)
+          if [ "${{ github.event_name }}" = "push" ]; then
+            sed -i "s/^version:.*/version: ${VERSION}/" "${ADDON_DIR}/config.yaml"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add "${ADDON_DIR}/config.yaml" || true
+            git commit -m "chore(${ADDON_DIR}): bump version to ${VERSION}" || true
+            git push || true
+          fi
 
   build:
-    needs: prepare
+    needs: [matrix, prepare]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -105,10 +126,31 @@ jobs:
         platform:
           - linux/amd64
           - linux/aarch64
+        addon: ${{ fromJson(needs.matrix.outputs.matrix).addon }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
+
+      - name: Resolve version + base for this addon
+        id: ver
+        env:
+          ADDON_DIR: ${{ matrix.addon.dir }}
+          STABLE_VER: ${{ needs.prepare.outputs.version_stable }}
+          STABLE_BASE: ${{ needs.prepare.outputs.base_tag_stable }}
+          BETA_VER: ${{ needs.prepare.outputs.version_beta }}
+          BETA_BASE: ${{ needs.prepare.outputs.base_tag_beta }}
+        run: |
+          if [ "$ADDON_DIR" = "music_assistant_youtube" ]; then
+            echo "version=$STABLE_VER" >> "$GITHUB_OUTPUT"
+            echo "base_tag=$STABLE_BASE" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$BETA_VER" >> "$GITHUB_OUTPUT"
+            echo "base_tag=$BETA_BASE" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stage youtube_provider into addon dir
+        run: cp -r youtube_provider ${{ matrix.addon.dir }}/youtube_provider
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -133,38 +175,14 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: music_assistant_youtube
-          file: music_assistant_youtube/Dockerfile
+          context: ${{ matrix.addon.dir }}
+          file: ${{ matrix.addon.dir }}/Dockerfile
           platforms: ${{ matrix.platform }}
           push: true
           build-args: |
-            BUILD_FROM=ghcr.io/music-assistant/server:${{ needs.prepare.outputs.base_tag }}
+            BUILD_FROM=ghcr.io/music-assistant/server:${{ steps.ver.outputs.base_tag }}
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/music-assistant-yt-dlp/${{ steps.arch.outputs.arch }}:${{ needs.prepare.outputs.version }}
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/music-assistant-yt-dlp/${{ steps.arch.outputs.arch }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.addon.image }}/${{ steps.arch.outputs.arch }}:${{ steps.ver.outputs.version }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.addon.image }}/${{ steps.arch.outputs.arch }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  release:
-    needs: [prepare, build]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Create release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ needs.prepare.outputs.version }}
-          BASE_TAG: ${{ needs.prepare.outputs.base_tag }}
-          COMMIT_MSG: ${{ needs.prepare.outputs.commit_msg }}
-        run: |
-          gh release create "$VERSION" \
-            --title "Music Assistant yt-dlp $VERSION" \
-            --notes "${COMMIT_MSG}
-
-          Rebuild based on upstream Music Assistant \`$BASE_TAG\`." \
-            --generate-notes \
-            --latest

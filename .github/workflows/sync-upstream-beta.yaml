@@ -1,9 +1,9 @@
-name: Sync Upstream MA Release (stable channel)
+name: Sync Upstream MA Release (beta channel)
 
 on:
   schedule:
-    # Check for new upstream releases every 6 hours
-    - cron: "0 */6 * * *"
+    # Check for new upstream releases every 6 hours (offset by 30 min from stable)
+    - cron: "30 */6 * * *"
   workflow_dispatch:
 
 jobs:
@@ -16,13 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get latest STABLE upstream MA server release
+      - name: Get latest BETA upstream MA server release
         id: check
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Track STABLE channel only — releases/latest excludes prereleases
-          UPSTREAM_VERSION=$(gh api repos/music-assistant/server/releases/latest --jq '.tag_name')
+          # Track BETA channel: latest non-draft, non-.dev release (beta or stable, whichever is newer)
+          UPSTREAM_VERSION=$(gh api 'repos/music-assistant/server/releases?per_page=30' \
+            --jq '[.[] | select(.draft == false) | select(.tag_name | test("\\.dev") | not)] | .[0].tag_name')
 
           if [ -z "$UPSTREAM_VERSION" ] || [ "$UPSTREAM_VERSION" = "null" ]; then
             echo "Failed to resolve upstream version" >&2
@@ -36,13 +37,13 @@ jobs:
           echo "$EOF_MARKER" >> "$GITHUB_OUTPUT"
 
           CURRENT_VERSION=""
-          if [ -f music_assistant_youtube/.upstream-version ]; then
-            CURRENT_VERSION=$(cat music_assistant_youtube/.upstream-version)
+          if [ -f music_assistant_youtube_beta/.upstream-version ]; then
+            CURRENT_VERSION=$(cat music_assistant_youtube_beta/.upstream-version)
           fi
 
           if [ "$UPSTREAM_VERSION" != "$CURRENT_VERSION" ]; then
             echo "new_release=true" >> "$GITHUB_OUTPUT"
-            echo "New STABLE upstream release: $UPSTREAM_VERSION (was: $CURRENT_VERSION)"
+            echo "New BETA upstream release: $UPSTREAM_VERSION (was: $CURRENT_VERSION)"
           else
             echo "new_release=false" >> "$GITHUB_OUTPUT"
             echo "Already up to date: $CURRENT_VERSION"
@@ -57,23 +58,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Update tracked stable version
+      - name: Update tracked beta version
         env:
           UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
         run: |
-          echo "$UPSTREAM_VERSION" > music_assistant_youtube/.upstream-version
-          sed -i "s/^version:.*/version: ${UPSTREAM_VERSION}/" music_assistant_youtube/config.yaml
-          sed -i "s|ghcr.io/music-assistant/server:[^ ]*|ghcr.io/music-assistant/server:${UPSTREAM_VERSION}|g" music_assistant_youtube/build.yaml
+          echo "$UPSTREAM_VERSION" > music_assistant_youtube_beta/.upstream-version
+          sed -i "s/^version:.*/version: ${UPSTREAM_VERSION}/" music_assistant_youtube_beta/config.yaml
+          sed -i "s|ghcr.io/music-assistant/server:[^ ]*|ghcr.io/music-assistant/server:${UPSTREAM_VERSION}|g" music_assistant_youtube_beta/build.yaml
 
       - name: Update changelog
         env:
           UPSTREAM_VERSION: ${{ needs.check-upstream.outputs.upstream_version }}
           UPSTREAM_NOTES: ${{ needs.check-upstream.outputs.upstream_notes }}
         run: |
-          CHANGELOG="music_assistant_youtube/CHANGELOG.md"
+          CHANGELOG="music_assistant_youtube_beta/CHANGELOG.md"
           {
             echo "## ${UPSTREAM_VERSION}"
-            echo "- Upstream Music Assistant server (stable) update to ${UPSTREAM_VERSION}"
+            echo "- Upstream Music Assistant server (beta) update to ${UPSTREAM_VERSION}"
             echo ""
             echo "### Upstream Release Notes"
             echo "${UPSTREAM_NOTES}"
@@ -90,8 +91,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add music_assistant_youtube/.upstream-version music_assistant_youtube/config.yaml music_assistant_youtube/build.yaml music_assistant_youtube/CHANGELOG.md
-          git commit -m "chore(stable): bump upstream MA to ${UPSTREAM_VERSION}"
+          git add music_assistant_youtube_beta/.upstream-version music_assistant_youtube_beta/config.yaml music_assistant_youtube_beta/build.yaml music_assistant_youtube_beta/CHANGELOG.md
+          git commit -m "chore(beta): bump upstream MA to ${UPSTREAM_VERSION}"
           git push
 
   build:
@@ -99,7 +100,7 @@ jobs:
     if: needs.check-upstream.outputs.new_release == 'true'
     uses: ./.github/workflows/build.yaml
     with:
-      addon_dir: music_assistant_youtube
+      addon_dir: music_assistant_youtube_beta
       upstream_version: ${{ needs.check-upstream.outputs.upstream_version }}
     permissions:
       contents: write

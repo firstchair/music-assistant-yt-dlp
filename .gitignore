@@ -1,3 +1,9 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# youtube_provider/ lives at repo root as the source of truth.
+# The build workflow copies it into each addon dir at build time —
+# don't commit those copies.
+music_assistant_youtube/youtube_provider/
+music_assistant_youtube_beta/youtube_provider/

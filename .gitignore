@@ -2,10 +2,12 @@ __pycache__/
 *.pyc
 .DS_Store
 
-# youtube_provider/ and addon_scripts/ live at repo root as the
-# single source of truth. The build workflow copies them into each
-# addon dir at build time — don't commit those copies.
+# youtube_provider/, firstchair_tools/, and addon_scripts/ live at
+# repo root as the single source of truth. The build workflow copies
+# them into each addon dir at build time — don't commit those copies.
 music_assistant_youtube/youtube_provider/
 music_assistant_youtube_beta/youtube_provider/
+music_assistant_youtube/firstchair_tools/
+music_assistant_youtube_beta/firstchair_tools/
 music_assistant_youtube/addon_scripts/
 music_assistant_youtube_beta/addon_scripts/

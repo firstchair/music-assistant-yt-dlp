@@ -1,0 +1,11 @@
+{
+  "type": "plugin",
+  "domain": "firstchair_tools",
+  "stage": "experimental",
+  "name": "Firstchair Tools",
+  "description": "Export and import the Music Assistant /data directory between Firstchair fork addons (stable ↔ beta).",
+  "codeowners": ["@firstchair"],
+  "documentation": "https://github.com/firstchair/music-assistant-yt-dlp#data-export--import-sync-between-stable-and-beta",
+  "multi_instance": false,
+  "requirements": []
+}

@@ -89,31 +89,30 @@ git push
 
 ## Data Export / Import (sync between stable and beta)
 
-Both addon images ship two CLI tools — `firstchair-export` and
-`firstchair-import` — that snapshot/restore the addon's `/data`
-directory to/from `/share/firstchair/exports/`. Since `/share/` is a
-host-shared volume, an export from one variant is visible in the other.
+Both addon variants ship a built-in **Firstchair Tools** plugin that
+appears in MA's **Settings → Plugins**. After enabling it, the plugin
+gives you two buttons:
+
+- **Export now** — hot snapshot of `/data` to `/share/firstchair/exports/<name>.tar.gz`. Works while MA is running.
+- **Import + restart** — pick a snapshot from the dropdown, click. The plugin runs the import and immediately asks Supervisor to restart this addon, so MA boots from the imported state. The page goes blank for ~10s while MA reboots, then comes back with the new data.
+
+Since `/share/` is host-shared, an export from one variant is visible in
+the other — typical workflow: export from BETA, install/open STABLE,
+import the same snapshot there.
+
+Every import auto-backs up your previous `/data` to
+`/share/firstchair/exports/auto-backup-<timestamp>.tar.gz` before
+overwriting — so rollback is just another import away.
+
+### CLI fallback
+
+The same tools are available as shell scripts inside the container:
 
 ```bash
-# In the BETA container — snapshot current state:
-docker exec addon_5894c5a0_music_assistant_youtube_beta firstchair-export my-test
-
-# In the STABLE container — restore from latest export:
-ha apps stop  5894c5a0_music_assistant_youtube
-docker exec addon_5894c5a0_music_assistant_youtube firstchair-import --latest
-ha apps start 5894c5a0_music_assistant_youtube
+docker exec addon_<slug> firstchair-export my-snapshot
+docker exec addon_<slug> firstchair-import --list
+docker exec addon_<slug> firstchair-import --latest --force
 ```
-
-`firstchair-import` always backs up the current `/data` to a
-timestamped tarball before overwriting, so you can roll back.
-List available exports:
-
-```bash
-docker exec addon_5894c5a0_music_assistant_youtube firstchair-import --list
-```
-
-For one-click access, expose them via HA `shell_command` + a Lovelace
-button — see [docs/ui-buttons.md](#one-click-buttons-in-ha) (TODO).
 
 ## Architecture Support
 

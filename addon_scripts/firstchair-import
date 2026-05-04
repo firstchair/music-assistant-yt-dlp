@@ -27,7 +27,15 @@ if [ "${1:-}" = "--list" ]; then
     exit 0
 fi
 
-SRC="${1:-}"
+# --force skips the WAL-running-MA prompt (used by boot-time import)
+FORCE=0
+SRC=""
+for a in "$@"; do
+    case "$a" in
+        --force) FORCE=1 ;;
+        *) [ -z "$SRC" ] && SRC="$a" ;;
+    esac
+done
 
 if [ "$SRC" = "--latest" ] || [ -z "$SRC" ]; then
     SRC=$(ls -t "$EXPORT_DIR"/*.tar.gz 2>/dev/null | head -1)
@@ -47,7 +55,7 @@ if [ ! -f "$SRC" ]; then
 fi
 
 # Sanity check that MA isn't running (heuristic — look for python in /data lock files)
-if [ -f "$DATA_DIR/library.db-shm" ] && [ -s "$DATA_DIR/library.db-shm" ]; then
+if [ "$FORCE" -eq 0 ] && [ -f "$DATA_DIR/library.db-shm" ] && [ -s "$DATA_DIR/library.db-shm" ]; then
     echo "WARNING: $DATA_DIR/library.db-shm exists and is non-empty — MA may be running."
     echo "         Stop the addon first to avoid corruption."
     echo "         Continue anyway? [y/N]"

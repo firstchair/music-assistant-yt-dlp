@@ -157,8 +157,10 @@ jobs:
             echo "base_tag=$BETA_BASE" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Stage youtube_provider into addon dir
-        run: cp -r youtube_provider ${{ matrix.addon.dir }}/youtube_provider
+      - name: Stage youtube_provider + addon_scripts into addon dir
+        run: |
+          cp -r youtube_provider ${{ matrix.addon.dir }}/youtube_provider
+          cp -r addon_scripts   ${{ matrix.addon.dir }}/addon_scripts
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

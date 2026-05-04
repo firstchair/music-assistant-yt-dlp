@@ -87,6 +87,34 @@ git merge upstream/main
 git push
 ```
 
+## Data Export / Import (sync between stable and beta)
+
+Both addon images ship two CLI tools — `firstchair-export` and
+`firstchair-import` — that snapshot/restore the addon's `/data`
+directory to/from `/share/firstchair/exports/`. Since `/share/` is a
+host-shared volume, an export from one variant is visible in the other.
+
+```bash
+# In the BETA container — snapshot current state:
+docker exec addon_5894c5a0_music_assistant_youtube_beta firstchair-export my-test
+
+# In the STABLE container — restore from latest export:
+ha apps stop  5894c5a0_music_assistant_youtube
+docker exec addon_5894c5a0_music_assistant_youtube firstchair-import --latest
+ha apps start 5894c5a0_music_assistant_youtube
+```
+
+`firstchair-import` always backs up the current `/data` to a
+timestamped tarball before overwriting, so you can roll back.
+List available exports:
+
+```bash
+docker exec addon_5894c5a0_music_assistant_youtube firstchair-import --list
+```
+
+For one-click access, expose them via HA `shell_command` + a Lovelace
+button — see [docs/ui-buttons.md](#one-click-buttons-in-ha) (TODO).
+
 ## Architecture Support
 
 - `amd64`

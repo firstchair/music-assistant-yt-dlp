@@ -1,0 +1,81 @@
+#!/bin/bash
+# firstchair-import — restore an export from /share/firstchair/exports/ into /data
+#
+# Usage:
+#   firstchair-import <name|path>
+#   firstchair-import --list           list available exports
+#   firstchair-import --latest         import most recent export
+#
+# IMPORTANT: stop the addon BEFORE running this (otherwise MA may corrupt the
+# imported DB). The script preserves a backup of the existing /data.
+
+set -euo pipefail
+
+EXPORT_DIR="/share/firstchair/exports"
+DATA_DIR="/data"
+
+list_exports() {
+    if [ ! -d "$EXPORT_DIR" ]; then
+        echo "(no exports — $EXPORT_DIR doesn't exist yet)"
+        return
+    fi
+    ls -laht "$EXPORT_DIR"/*.tar.gz 2>/dev/null | head -20 || echo "(no exports)"
+}
+
+if [ "${1:-}" = "--list" ]; then
+    list_exports
+    exit 0
+fi
+
+SRC="${1:-}"
+
+if [ "$SRC" = "--latest" ] || [ -z "$SRC" ]; then
+    SRC=$(ls -t "$EXPORT_DIR"/*.tar.gz 2>/dev/null | head -1)
+    [ -n "$SRC" ] || { echo "No exports found in $EXPORT_DIR"; exit 1; }
+fi
+
+# Resolve "name" → path
+if [ ! -f "$SRC" ]; then
+    if   [ -f "$EXPORT_DIR/$SRC" ];        then SRC="$EXPORT_DIR/$SRC"
+    elif [ -f "$EXPORT_DIR/$SRC.tar.gz" ]; then SRC="$EXPORT_DIR/$SRC.tar.gz"
+    else
+        echo "Not found: $1" >&2
+        echo "Available exports:" >&2
+        list_exports >&2
+        exit 1
+    fi
+fi
+
+# Sanity check that MA isn't running (heuristic — look for python in /data lock files)
+if [ -f "$DATA_DIR/library.db-shm" ] && [ -s "$DATA_DIR/library.db-shm" ]; then
+    echo "WARNING: $DATA_DIR/library.db-shm exists and is non-empty — MA may be running."
+    echo "         Stop the addon first to avoid corruption."
+    echo "         Continue anyway? [y/N]"
+    read -r ans
+    [ "$ans" = "y" ] || { echo "Aborted."; exit 1; }
+fi
+
+# Backup existing /data
+BACKUP_DIR="${EXPORT_DIR}/auto-backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+echo "==> Backing up current /data → $BACKUP_DIR"
+tar \
+    --exclude='cache.db' \
+    --exclude='cache.db-wal' \
+    --exclude='cache.db-shm' \
+    --exclude='.cache/*' \
+    --exclude='collage_images/*' \
+    -czf "$BACKUP_DIR" \
+    -C "$DATA_DIR" . 2>/dev/null || echo "    (no existing data, skipping backup)"
+
+# Wipe /data and restore from import
+echo "==> Restoring from $SRC into $DATA_DIR"
+find "$DATA_DIR" -mindepth 1 -maxdepth 1 \
+    ! -name 'cache.db*' \
+    ! -name '.cache' \
+    ! -name 'collage_images' \
+    -exec rm -rf {} +
+tar -xzf "$SRC" -C "$DATA_DIR"
+
+echo "==> Done."
+echo "    Restart the addon to use the new data."
+echo "    Previous /data was backed up to: $BACKUP_DIR"

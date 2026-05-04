@@ -1,0 +1,50 @@
+#!/bin/bash
+# firstchair-export — snapshot the running addon's /data dir to /share/firstchair/exports/
+#
+# Usage:
+#   firstchair-export [name]
+#
+# If name is omitted, a timestamped name is generated.
+# Tarball is gzipped and excludes cache files.
+#
+# WARNING: it's safer to stop the addon first to avoid SQLite WAL inconsistency.
+# The script will warn but won't enforce — sometimes you want a hot snapshot.
+
+set -euo pipefail
+
+NAME="${1:-snapshot-$(date +%Y%m%d-%H%M%S)}"
+EXPORT_DIR="/share/firstchair/exports"
+DATA_DIR="/data"
+
+# Detect addon name from MA's data
+INSTANCE_HINT=""
+if [ -f "${DATA_DIR}/server.json" ]; then
+    INSTANCE_HINT=$(python3 -c 'import json,sys; print(json.load(open("/data/server.json")).get("instance_id","")[:8])' 2>/dev/null || echo "")
+fi
+
+mkdir -p "$EXPORT_DIR"
+TARGET="${EXPORT_DIR}/${NAME}.tar.gz"
+
+if [ -e "$TARGET" ]; then
+    echo "Refusing to overwrite existing: $TARGET" >&2
+    echo "Pass a different name, or remove the file first." >&2
+    exit 1
+fi
+
+echo "==> Exporting $DATA_DIR  →  $TARGET"
+[ -n "$INSTANCE_HINT" ] && echo "    MA instance hint: $INSTANCE_HINT"
+echo "    (excluding cache.db, .cache/, collage_images/)"
+
+tar \
+    --exclude='cache.db' \
+    --exclude='cache.db-wal' \
+    --exclude='cache.db-shm' \
+    --exclude='.cache/*' \
+    --exclude='collage_images/*' \
+    -czf "$TARGET" \
+    -C "$DATA_DIR" .
+
+SIZE=$(du -h "$TARGET" | cut -f1)
+echo "==> Done. $TARGET ($SIZE)"
+echo "    To import in another firstchair addon:"
+echo "      firstchair-import ${NAME}"

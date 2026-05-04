@@ -21,6 +21,7 @@ apparmor: true
 map:
   - media:rw
   - ssl:ro
+  - share:rw
 init: false
 advanced: false
 backup_exclude:

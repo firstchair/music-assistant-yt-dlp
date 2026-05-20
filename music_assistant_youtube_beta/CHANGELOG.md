@@ -1,3 +1,37 @@
+## 2.9.0b13
+- Upstream Music Assistant server (beta) update to 2.9.0b13
+
+### Upstream Release Notes
+## 📦 Beta Release
+
+_Changes since [2.9.0b12](https://github.com/music-assistant/server/releases/tag/2.9.0b12)_
+
+### 🐛 Bugfixes
+
+- Remove initial_delay to fix duplicate lastfm recommendation rows (by @OzGav in #3920)
+- Fix server crash on non-RGB cover art in palette extractor (by @OzGav in #3921)
+- Sonos S1: Implement select_source for line-in support (by @MarvinSchenkel in #3925)
+- Streams: Handle empty supported_sample_rates in get_output_format (by @MarvinSchenkel in #3926)
+- Fix HEOS showing incorrect Now Playing (by @Tommatheussen in #3928)
+- Close coroutines when submitted in rapid succession (by @MarvinSchenkel in #3929)
+- Fix issues with M4B audiobooks (by @OzGav in #3930)
+
+### 🎨 Frontend Changes
+
+- Fix Audio Pipeline volume normalisation line (by @OzGav in [#1752](https://github.com/music-assistant/frontend/pull/1752))
+- Fix genre casing (by @OzGav in [#1744](https://github.com/music-assistant/frontend/pull/1744))
+
+### 🧰 Maintenance and dependency bumps
+
+- Improve lastfm recommendations (by @OzGav in #3922)
+- ⬆️ Update music-assistant-frontend to 2.17.160 (by @music-assistant-machine in #3927)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @Tommatheussen
+
 ## 2.9.0b12
 - Upstream Music Assistant server (beta) update to 2.9.0b12
 

@@ -1,3 +1,32 @@
+## 2.9.0rc6
+- Upstream Music Assistant server (beta) update to 2.9.0rc6
+
+### Upstream Release Notes
+## 📦 RC Release
+
+_Changes since [2.9.0rc5](https://github.com/music-assistant/server/releases/tag/2.9.0rc5)_
+
+### 🐛 Bugfixes
+
+- Last.fm provider search bug fixes (by @OzGav in #4159)
+- Fix 30s delay when grouping some Sendspin devices (by @maximmaxim345 in #4160)
+- Prevent out-of-memory crash when compacting the library database (by @MarvinSchenkel in #4161)
+
+### 🎨 Frontend Changes
+
+- Store some settings per user (by @OzGav in [#1335](https://github.com/music-assistant/frontend/pull/1335))
+- Fix heart icon spacing in list view and keep listing search visible (by @MarvinSchenkel in [#1903](https://github.com/music-assistant/frontend/pull/1903))
+
+### 🧰 Maintenance and dependency bumps
+
+- ⬆️ Update music-assistant-frontend to 2.17.185 (by @music-assistant-machine in #4162)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @maximmaxim345
+
 ## 2.9.0rc4
 - Upstream Music Assistant server (beta) update to 2.9.0rc4
 

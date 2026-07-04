@@ -1,3 +1,186 @@
+## 2.10.0b3
+- Upstream Music Assistant server (beta) update to 2.10.0b3
+
+### Upstream Release Notes
+## 📦 Beta Release
+
+_Changes since [2.10.0b2](https://github.com/music-assistant/server/releases/tag/2.10.0b2)_
+
+### 🚀 New Providers
+
+- Add playlist_metadata plugin for auto-generating playlist artwork (by @dmoo500 in #3786)
+- Add Bose SoundTouch player provider (by @Odn0 in #3891)
+
+### 🚀 Features and enhancements
+
+- Improve stream URL handling with failover support (by @benklop in #2996)
+- Adapt artist / audiobook controller for authors and narrators (by @fmunkes in #3570)
+- Extend Local Audio Out provider with PulseAudio support (by @iVolt1 in #3724)
+- Plex: Add audiobook/podcast support with position sync (by @zenibako in #3748)
+- Add CUE sheet support for filesystem providers (by @OzGav in #3751)
+- Enhance play_media start_item parameter to allow latest podcast episode to be played and podcast/playlist to play from here (by @OzGav in #3832)
+- Add birthday/memoriam recommendations via MusicBrainz (by @dmoo500 in #3833)
+- Rewrite Deezer provider with GraphQL client (by @jdaberkow in #3900)
+- Provide Tracking and UX for AA Failures and Retries (by @chrisuthe in #4167)
+- Import additional metadata from Plex into media items (by @lebdim in #4338)
+- mcp: add set_repeat tool to queue controls (by @steamEngineer in #4377)
+- mcp: add explicit pause/resume playback tools (by @steamEngineer in #4390)
+- mcp: add players ungroup tool  (by @steamEngineer in #4391)
+- Adjust Sonic Similarity base scoring and pools to allow for better matching and more meaningful presets (by @chrisuthe in #4429)
+- Improve Search results from Sonic Similarity Plugin (by @chrisuthe in #4430)
+- Add native player sleep timers (by @teancom in #4432)
+- Enhance and fix podcast metadata (episode descriptions, chapters, parent-podcast name) in gPodder, iTunes Podcast and Podcast RSS Feed (by @chrisuthe in #4444)
+- Smart Playlist: Use library artwork from metadata providers (by @dmoo500 in #4447)
+- Unload idle audio-analysis models to reclaim memory (by @marcelveldt in #4452)
+- Add playlist metadata infrastructure to MetadataProvider (by @dmoo500 in #4460)
+- Genre content-type awareness: create/edit safety + targeted restore (by @jozefKruszynski in #4474)
+- Smart shuffle for player queues (by @marcelveldt in #4475)
+- Add support for podcast chapters in Audiobookshelf (by @fmunkes in #4478)
+- Bounded managed pool for radio mode (by @marcelveldt in #4479)
+- Extend podcast (by @chrisuthe in #4492)
+- Dynamic radio playlists (replacing radio mode) (by @marcelveldt in #4498)
+- Honour the queue's recency windows in provider dynamic stations (by @marcelveldt in #4500)
+- Add played_only parameter to library_items methods (by @dmoo500 in #4502)
+- Play finite sources in a dynamic queue through once instead of recycling them (by @marcelveldt in #4503)
+- Add AirPlay DACP replay tests and verbose traffic capture (by @MarvinSchenkel in #4507)
+- Turn a queue with any dynamic source into one bounded smart-shuffled pool (by @marcelveldt in #4513)
+- Add duration and last_played filters to Smart Playlist (by @dmoo500 in #4520)
+- Avoid back-to-back artists in dynamic queues (by @marcelveldt in #4528)
+- Smart crossfade: DJ-style bass swap EQ (by @MarvinSchenkel in #4536)
+- Global defaults for queue settings with per-queue override (by @marcelveldt in #4537)
+- Explain the queue Global option via a per-option description (by @marcelveldt in #4540)
+- Only expose container items as player queue sources (by @marcelveldt in #4542)
+- Add per-option help text to config selects (by @marcelveldt in #4546)
+- Show unavailable player control and AirPlay protocol options as disabled (by @marcelveldt in #4551)
+- Expose album artist on player current media (by @MarvinSchenkel in #4560)
+
+### 🐛 Bugfixes
+
+- Avoid syncing native parent volume to AirPlay protocols (by @jyundt in #3980)
+- Apple Music: Intelligent fallback for deprecated catalog tracks (by @dmoo500 in #4109)
+- Smart Playlist: Enrich library tracks with database genres for filtering (by @dmoo500 in #4175)
+- Convert HTML in media descriptions to markdown (by @MarvinSchenkel in #4225)
+- fastMCP Server: Connect Wizard fixes for reverse-proxy deployments (by @Sawtaytoes in #4313)
+- Pre-import numpy in scoped-coverage CI to avoid py3.14 reduction break (by @chrisuthe in #4445)
+- Give playback priority over realtime audio analysis (by @marcelveldt in #4449)
+- Cap concurrent realtime audio analysis sessions (by @marcelveldt in #4451)
+- Fix Local Audio pulse audio syncing, silence, and volume on intial playback (by @iVolt1 in #4453)
+- Audiobookshelf: tolerate out-of-range podcast episode dates (by @OzGav in #4458)
+- Fix smart playlist genre AND logic (by @dmoo500 in #4459)
+- Fix min/max volume scaling lost on protocol/external volume redirect (by @Hopperpop in #4461)
+- Unsync a player when its power is turned off externally (by @marcelveldt in #4463)
+- Improve Hue entertainment start reliability for slow DTLS handshakes (by @steamEngineer in #4467)
+- Fix discover page not loading due to MusicBrainz recommendation scan (by @marcelveldt in #4470)
+- Prevent providers picking the same port when starting concurrently (by @marcelveldt in #4472)
+- Fix the podcast's title not being used in Audiobookshelf's episode parser (by @fmunkes in #4477)
+- iBroadcast mapping issue with album id's and possible other id's (by @robsonke in #4482)
+- Prevent a crash when a CPU can't execute on-device analysis (by @marcelveldt in #4483)
+- Fix QUIC/HTTP-3 debug log spam caused by urllib3-future override (by @MarvinSchenkel in #4485)
+- Fix startup crash from provider config entry missing 'domain' (by @chrisuthe in #4488)
+- Fix lrclib plain lyrics written to the synced-LRC field (by @chrisuthe in #4489)
+- Fix audiobook release_date parsed but never stored (by @chrisuthe in #4490)
+- Fix deezer parse_streamable returning Any from a bool function (by @chrisuthe in #4491)
+- Handle Spotify's refresh-token changes (by @OzGav in #4494)
+- Fix negative elapsed_time crashing clients (by @teancom in #4495)
+- Catch only MusicAssistantError in playlist metadata enrichment (by @dmoo500 in #4499)
+- Fix Squeezelite progress bar showing previous track position after track change (by @MarvinSchenkel in #4504)
+- Detect stalled source streams when the connection drops mid-playback (by @MarvinSchenkel in #4505)
+- Mark Snapcast players offline when abruptly powered off (by @MarvinSchenkel in #4506)
+- Subsonic: Convert provider to StreamType.HTTP (by @khers in #4508)
+- Fix first queued item being skipped when playing onto an idle queue (by @marcelveldt in #4514)
+- Revert squeezelite-local media_position workaround (#4504) (by @MarvinSchenkel in #4517)
+- Honour play-next under shuffle and set the current item when enqueuing onto an empty queue (by @marcelveldt in #4519)
+- Don't auto-start playback when an ADD/NEXT onto an idle queue enters dynamic mode (by @marcelveldt in #4521)
+- Keep the dynamic queue bounded when adding more sources (by @marcelveldt in #4522)
+- Dedupe the queue's sources list so a repeated source shows once (by @marcelveldt in #4524)
+- Preserve player queues and their settings across restarts (by @marcelveldt in #4529)
+- Fix Spotify connect playback on some Sendspin players (by @maximmaxim345 in #4530)
+- Fix complete config loss after power failure or unclean shutdown (by @MarvinSchenkel in #4534)
+- Fix smart fades falling back to a hard cut when the incoming track is short (by @MarvinSchenkel in #4535)
+- Fix AirPlay receiver advertising on the wrong network interface (by @marcelveldt in #4543)
+- Allow smart playlists through metadata enrichment (by @dmoo500 in #4545)
+- Remove Home Assistant musllinux wheel index from package install (by @MarvinSchenkel in #4549)
+- Restrict the image palette API to an opaque image id (by @marcelveldt in #4550)
+- Stop exposing internal error details in Plex Connect responses (by @MarvinSchenkel in #4563)
+- Match NetEase image CDN hostname exactly when upgrading to https (by @MarvinSchenkel in #4564)
+- Fix open redirect on login page and requirements regex char range (by @MarvinSchenkel in #4565)
+- Pace background audio analysis to stop it saturating the CPU (by @oldrobotdev in #4568)
+
+### 🎨 Frontend Changes
+
+- Restore the player settings entry in the player menu (by @marcelveldt in [#1969](https://github.com/music-assistant/frontend/pull/1969))
+- Lokalise: Translations update (by @marcelveldt in [#1971](https://github.com/music-assistant/frontend/pull/1971))
+- add bitrate information to the QualityDetailsBtn.vue screen (by @Bonusbartus in [#1754](https://github.com/music-assistant/frontend/pull/1754))
+- Add sleep timer support (by @marcelveldt in [#1970](https://github.com/music-assistant/frontend/pull/1970))
+- Include icon aliases in IconPicker search results (by @dmoo500 in [#1972](https://github.com/music-assistant/frontend/pull/1972))
+- Add missing aria labels (by @stvncode in [#1973](https://github.com/music-assistant/frontend/pull/1973))
+- Upgrade eslint + add oxlint (by @stvncode in [#1958](https://github.com/music-assistant/frontend/pull/1958))
+- Add smart shuffle indicator to the player (by @marcelveldt in [#1987](https://github.com/music-assistant/frontend/pull/1987))
+- Provide Tracking and UX for AA Failures and Retries (by @chrisuthe in [#1907](https://github.com/music-assistant/frontend/pull/1907))
+- Restore timeline progress bar spacing in the player bar (by @MarvinSchenkel in [#1994](https://github.com/music-assistant/frontend/pull/1994))
+- Lokalise translations update (by @[github-actions[bot]](https://github.com/apps/github-actions) in [#1989](https://github.com/music-assistant/frontend/pull/1989))
+- Adopt dynamic radio playlists (replace radio mode) (by @marcelveldt in [#1995](https://github.com/music-assistant/frontend/pull/1995))
+- Declutter the player queue list item layout (by @MarvinSchenkel in [#1988](https://github.com/music-assistant/frontend/pull/1988))
+- Fix main listing search stealing focus from other inputs (by @OzGav in [#1991](https://github.com/music-assistant/frontend/pull/1991))
+- Center the play button in the fullscreen player controls (by @MarvinSchenkel in [#1993](https://github.com/music-assistant/frontend/pull/1993))
+- Fix buffered icon spacing in the player queue list (by @MarvinSchenkel in [#1992](https://github.com/music-assistant/frontend/pull/1992))
+- Fix browse sort/view settings not persisting per folder (by @OzGav in [#1990](https://github.com/music-assistant/frontend/pull/1990))
+- Remove the smart playlist 'do not repeat' control (by @marcelveldt in [#1996](https://github.com/music-assistant/frontend/pull/1996))
+- Restore progress bar fill thickness and time-label spacing (by @MarvinSchenkel in [#1997](https://github.com/music-assistant/frontend/pull/1997))
+- Improve fullscreen player controls and lyrics/queue behavior (by @marcelveldt in [#1999](https://github.com/music-assistant/frontend/pull/1999))
+- Show per-option description in config-entry select (by @marcelveldt in [#2003](https://github.com/music-assistant/frontend/pull/2003))
+- Convert player protocol section to a shadcn accordion (by @marcelveldt in [#2011](https://github.com/music-assistant/frontend/pull/2011))
+
+### Other Changes
+
+- Lokalise translations update (by @github-actions[bot] in #4454)
+- Split config controller into a package (by @MarvinSchenkel in #4484)
+- Lokalise translations update (by @github-actions[bot] in #4497)
+- Refactor player-queues controller (by @marcelveldt in #4509)
+- Refactor smart fades into a plan/render architecture (by @MarvinSchenkel in #4532)
+
+### 🧰 Maintenance and dependency bumps
+
+<details>
+<summary>28 changes</summary>
+
+- Refactor MusicBrainz provider into multi-file package (by @dmoo500 in #3905)
+- Update srptools requirement from >=1.0.0 to >=1.0.1 (by @dependabot[bot] in #4234)
+- Bump torch from 2.11.0 to 2.12.1+cpu (by @dependabot[bot] in #4403)
+- ⬆️ Update music-assistant-frontend to 2.17.201 (by @music-assistant-machine in #4448)
+- ⬆️ Update music-assistant-frontend to 2.17.202 (by @music-assistant-machine in #4455)
+- Document provider_mappings database structure (by @dmoo500 in #4466)
+- ⬆️ Update music-assistant-frontend to 2.17.203 (by @music-assistant-machine in #4468)
+- Auto-sync provider manifests on Dependabot PRs (by @marcelveldt in #4471)
+- Replace obfuscated app_vars with build-time secret injection (by @marcelveldt in #4473)
+- ⬆️ Update music-assistant-models to 1.1.145 (by @music-assistant-machine in #4476)
+- Clarify supported installation methods in README (by @marcelveldt in #4480)
+- Bump wiim from 0.1.4 to 0.1.5 (by @dependabot[bot] in #4481)
+- ⬆️ Update music-assistant-frontend to 2.17.204 (by @music-assistant-machine in #4496)
+- ⬆️ Update music-assistant-frontend to 2.17.205 (by @music-assistant-machine in #4511)
+- Fix stale docs in the player-queues package (by @marcelveldt in #4518)
+- Bump docker/build-push-action from 7.2.0 to 7.3.0 (by @dependabot[bot] in #4523)
+- ⬆️ Update music-assistant-models to 1.1.147 (by @music-assistant-machine in #4525)
+- ⬆️ Update music-assistant-frontend to 2.17.206 (by @music-assistant-machine in #4527)
+- ⬆️ Update music-assistant-models to 1.1.149 (by @music-assistant-machine in #4539)
+- Bump aioslimproto to 3.1.9 (by @MarvinSchenkel in #4541)
+- Remove the deprecated legacy image proxy endpoint (by @marcelveldt in #4544)
+- Bump docker/login-action from 4.2.0 to 4.3.0 (by @dependabot[bot] in #4547)
+- Bump docker/setup-buildx-action from 4.1.0 to 4.2.0 (by @dependabot[bot] in #4548)
+- ⬆️ Update music-assistant-frontend to 2.17.207 (by @music-assistant-machine in #4552)
+- ⬆️ Update music-assistant-models to 1.1.150 (by @music-assistant-machine in #4553)
+- ⬆️ Update music-assistant-models to 1.1.151 (by @music-assistant-machine in #4569)
+- Bump docker/login-action from 4.3.0 to 4.4.0 (by @dependabot[bot] in #4574)
+- ⬆️ Update music-assistant-frontend to 2.17.208 (by @music-assistant-machine in #4575)
+
+</details>
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@Bonusbartus, @Hopperpop, @MarvinSchenkel, @Odn0, @OzGav, @Sawtaytoes, @benklop, @chrisuthe, @dmoo500, @fmunkes, @iVolt1, @jdaberkow, @jozefKruszynski, @jyundt, @khers, @lebdim, @marcelveldt, @maximmaxim345, @oldrobotdev, @robsonke, @steamEngineer, @stvncode, @teancom, @zenibako
+
 ## 2.9.5
 - Upstream Music Assistant server (beta) update to 2.9.5
 

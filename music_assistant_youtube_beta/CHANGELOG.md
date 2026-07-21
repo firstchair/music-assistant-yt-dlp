@@ -1,3 +1,129 @@
+## 2.10.0b7
+- Upstream Music Assistant server (beta) update to 2.10.0b7
+
+### Upstream Release Notes
+## 📦 Beta Release
+
+_Changes since [2.10.0b6](https://github.com/music-assistant/server/releases/tag/2.10.0b6)_
+
+### 🚀 New Providers
+
+- Add Yandex Station player provider v1.5.1 — local Glagol control, Alice playback intercept (by @trudenboy in #3605)
+- Add teddycloud provider (by @yoyixms in #4776)
+- Add OneDrive filesystem provider (by @OzGav in #4791)
+
+### 🚀 Features and enhancements
+
+- Plex: Add extended recommendations with "Mixes For You" support (by @ajacobson in #3736)
+- Yandex Smart Home: update v1.4.x → v2.2.4 — playlists as sources, skill auto-create, shared auth layer (by @trudenboy in #3834)
+- Seed Last.fm personalized rows from recent plays (by @OzGav in #4457)
+- Add vocal activity detection to Smart Fades (by @MarvinSchenkel in #4786)
+- Return library tracks when browsing filesystem (by @teancom in #4792)
+- Add complete audio processing details (by @marcelveldt in #4793)
+- Preload lyrics in Music Quiz (by @marcelveldt in #4805)
+- Allow any authenticated user on party and music quiz guest routes (by @teancom in #4808)
+- Show AI availability in Music Quiz (by @marcelveldt in #4810)
+- Smart Fades: vocal and energy aware transition planning (by @MarvinSchenkel in #4816)
+- Vary songs when replaying Music Quiz (by @marcelveldt in #4817)
+- Normalise synced (LRC) lyrics before storing or serving them (by @OzGav in #4823)
+- Yandex Music Connect (Ynison): update to v3.4.2 — shared auth layer, lossless-safe fallback, stable stage (by @trudenboy in #4827)
+- Ask Music Timeline bonuses after every placement (by @marcelveldt in #4830)
+- FastMCP server: queue curation tools, agent ergonomics, opt-in simplified tool discovery (v0.17.0) (by @trudenboy in #4833)
+- Include track duration and played duration in ListenBrainz submissions (by @tesmerjg in #4843)
+- Add sendspin encryption support (by @arturpragacz in #4846)
+- Add DSP gain and balance filters (by @OzGav in #4857)
+
+### 🐛 Bugfixes
+
+- Fix album version parsing and album_versions for filesystem_local provider (by @allmazz in #4746)
+- Safely serialize OAuth callback values (by @MarvinSchenkel in #4796)
+- Decrypt stored Google Drive client secret when re-authorizing (by @OzGav in #4797)
+- Fix legacy Smart Fades centroid corruption (by @MarvinSchenkel in #4798)
+- Fix radio station image passed as raw provider path in stream metadata (by @OzGav in #4800)
+- Fix ORF Radiothek provider staying unloaded when startup coincides with network unavailable (by @OzGav in #4801)
+- Offer fake mute control for players with protocol-provided volume (by @OzGav in #4802)
+- Keep metadata scan tasks running when a library row has corrupt metadata JSON (by @OzGav in #4803)
+- Bulk-resolve Sonic Similarity candidates to stop event-loop stalls (by @chrisuthe in #4804)
+- Fix Music Quiz speaker selection for groups (by @marcelveldt in #4809)
+- Fix Sonos S1 enqueue failing with UPnP error 701 (by @OzGav in #4813)
+- Allow adding players to a dynamic sync group when all members are offline (by @OzGav in #4814)
+- Fix sync group stopping playback when members are removed mid-regroup (by @MarvinSchenkel in #4815)
+- Fix OOM in Smart Fades centroid repair migration (by @MarvinSchenkel in #4819)
+- Fix translations in browse view of Audiobookshelf (by @fmunkes in #4820)
+- Fix smart fades cutting off the outgoing track when vocal analysis data is stale (by @MarvinSchenkel in #4825)
+- Fix album track order for YT Music tracks without disc info (by @MarvinSchenkel in #4826)
+- Improve remote connection stability (by @marcelveldt in #4831)
+- Fix fake mute never reporting muted state (by @OzGav in #4839)
+- Ignore WiiM's false PLAYING report while no media is loaded (by @marcelveldt in #4844)
+- Improve webrtc key file creation (by @arturpragacz in #4847)
+- Don't allow ffmpeg to try range requests when using POST data (by @khers in #4850)
+- Include synchronized players in audio chains (by @marcelveldt in #4856)
+- Report UGP MP3 quality correctly (by @marcelveldt in #4858)
+- Sort filesystem browse results in natural order (by @OzGav in #4869)
+
+### 🎨 Frontend Changes
+
+- Share party and quiz invitations (by @marcelveldt in [#2125](https://github.com/music-assistant/frontend/pull/2125))
+- Show quiz results without scrolling (by @marcelveldt in [#2123](https://github.com/music-assistant/frontend/pull/2123))
+- Avoid opening the keyboard in the player menu (by @marcelveldt in [#2124](https://github.com/music-assistant/frontend/pull/2124))
+- Lokalise translations update (by @[github-actions[bot]](https://github.com/apps/github-actions) in [#2138](https://github.com/music-assistant/frontend/pull/2138))
+- Clarify Music Timeline ordering (by @marcelveldt in [#2145](https://github.com/music-assistant/frontend/pull/2145))
+- Use the global i18n scope for the missing-players hint (by @teancom in [#2143](https://github.com/music-assistant/frontend/pull/2143))
+- Let signed-in users join guest experiences (by @marcelveldt in [#2126](https://github.com/music-assistant/frontend/pull/2126))
+- Fix guest api errors (by @teancom in [#2140](https://github.com/music-assistant/frontend/pull/2140))
+- Show this device in group controls (by @marcelveldt in [#2142](https://github.com/music-assistant/frontend/pull/2142))
+- Also send updates when artist or title changes (by @joostlek in [#2152](https://github.com/music-assistant/frontend/pull/2152))
+- Improve Music Quiz host controls (by @marcelveldt in [#2151](https://github.com/music-assistant/frontend/pull/2151))
+- Improve Music Timeline answers (by @marcelveldt in [#2149](https://github.com/music-assistant/frontend/pull/2149))
+- Unify list row layout and refine play affordances (by @MarvinSchenkel in [#1862](https://github.com/music-assistant/frontend/pull/1862))
+- Use return values instead of deprecated next() in navigation guard (by @teancom in [#2144](https://github.com/music-assistant/frontend/pull/2144))
+- Fix media controls while playing along (by @marcelveldt in [#2150](https://github.com/music-assistant/frontend/pull/2150))
+- Use official Sendspin audio unlock (by @marcelveldt in [#2153](https://github.com/music-assistant/frontend/pull/2153))
+- Show complete audio processing details (by @marcelveldt in [#2127](https://github.com/music-assistant/frontend/pull/2127))
+- Add MiniEqualizer: waveform-driven now-playing indicator (by @dmoo500 in [#2147](https://github.com/music-assistant/frontend/pull/2147))
+- Polish audio processing details (by @marcelveldt in [#2156](https://github.com/music-assistant/frontend/pull/2156))
+- Show selected DSP preset in settings (by @zednotdead in [#1936](https://github.com/music-assistant/frontend/pull/1936))
+
+### Other Changes
+
+- Lokalise translations update (by @github-actions[bot] in #4795)
+- Smart Fades: verbose logging for candidate-selection tuning (by @MarvinSchenkel in #4824)
+- Lokalise translations update (by @github-actions[bot] in #4886)
+
+### 🧰 Maintenance and dependency bumps
+
+<details>
+<summary>20 changes</summary>
+
+- ⬆️ Update music-assistant-models to 1.1.161 (by @music-assistant-machine in #4794)
+- ⬆️ Update music-assistant-frontend to 2.17.223 (by @music-assistant-machine in #4811)
+- ⬆️ Update music-assistant-models to 1.1.163 (by @music-assistant-machine in #4812)
+- ⬆️ Update music-assistant-frontend to 2.17.224 (by @music-assistant-machine in #4818)
+- Remove outdated note that AirPlay 2 can't group (by @Kyzcreig in #4821)
+- Prefer AirPlay 2 for known JBL models in automatic protocol selection (by @OzGav in #4822)
+- ⬆️ Update music-assistant-frontend to 2.17.225 (by @music-assistant-machine in #4832)
+- ⬆️ Update music-assistant-frontend to 2.17.226 (by @music-assistant-machine in #4837)
+- Organize metadata controller methods (by @marcelveldt in #4838)
+- Tidal: reliability fixes, API client cleanup and faster tests (by @jozefKruszynski in #4842)
+- Remove redundant client disconnect loop from Sendspin provider unload (by @arturpragacz in #4848)
+- ⬆️ Update music-assistant-frontend to 2.17.227 (by @music-assistant-machine in #4851)
+- Bump mutagen from 1.47.0 to 1.48.1 (by @dependabot[bot] in #4860)
+- Bump ruff from 0.15.6 to 0.15.22 (by @dependabot[bot] in #4861)
+- Bump pyacoustid from 1.3.0 to 1.3.1 (by @dependabot[bot] in #4862)
+- ⬆️ Update music-assistant-frontend to 2.17.228 (by @music-assistant-machine in #4865)
+- Update music-assistant-models to 1.1.166 (by @MarvinSchenkel in #4868)
+- Add Traditional Chinese to locales (by @OzGav in #4870)
+- Deduplicate yandex_music device-code page strings into common (by @OzGav in #4873)
+- Bump actions/setup-python from 6.3.0 to 7.0.0 (by @dependabot[bot] in #4877)
+
+</details>
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@Kyzcreig, @MarvinSchenkel, @OzGav, @ajacobson, @allmazz, @arturpragacz, @chrisuthe, @dmoo500, @fmunkes, @joostlek, @jozefKruszynski, @khers, @marcelveldt, @teancom, @tesmerjg, @trudenboy, @yoyixms, @zednotdead
+
 ## 2.9.9
 - Upstream Music Assistant server (beta) update to 2.9.9
 

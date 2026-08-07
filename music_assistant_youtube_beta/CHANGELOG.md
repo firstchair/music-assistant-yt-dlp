@@ -1,3 +1,96 @@
+## 2.10.0b12
+- Upstream Music Assistant server (beta) update to 2.10.0b12
+
+### Upstream Release Notes
+## 📦 Beta Release
+
+_Changes since [2.10.0b11](https://github.com/music-assistant/server/releases/tag/2.10.0b11)_
+
+### 🚀 New Providers
+
+- Add Storytel provider integration (by @jonasbp2011 in #4054)
+
+### 🚀 Features and enhancements
+
+- Support getting OpenSubsonic radio stations from music source (by @frjol in #5150)
+- Ask Music Quiz Trivia release year questions about compilation tracks (by @marcelveldt in #5373)
+- Start audio overlays without a delay (by @marcelveldt in #5379)
+- Date quiz songs without an ISRC by artist and title (by @marcelveldt in #5386)
+- Apple Music: batch library sync requests to cut API usage (by @MarvinSchenkel in #5391)
+- More accurate release years for Music Quiz songs (by @marcelveldt in #5413)
+
+### 🐛 Bugfixes
+
+- Align Spotify app volume with MA player volume on connection (by @OzGav in #5303)
+- Better crossfades on tracks with long outros, ambient blends and mastered fade-outs (by @MarvinSchenkel in #5365)
+- Fix missing mute control for universal group players (by @marcelveldt in #5375)
+- Keep a mono sound effect at the same volume as a stereo one (by @marcelveldt in #5376)
+- Fix playback stopping after the first track on grouped Sonos speakers (by @marcelveldt in #5385)
+- Keep the chosen metadata language when other settings are saved (by @marcelveldt in #5396)
+- Keep manually set radio name and artwork in playlists (by @OzGav in #5404)
+- Fix Sonos S1 speakers hanging after a failed subscription (by @marcelveldt in #5406)
+- Fix playback from Home Assistant failing with a permission error (by @MarvinSchenkel in #5410)
+- Keep a synced pair of speakers muted when the group volume changes (by @marcelveldt in #5420)
+
+### 🎨 Frontend Changes
+
+- Fix skip forward/backward in the OS media notification (by @marcelveldt in [#2271](https://github.com/music-assistant/frontend/pull/2271))
+- Tidy up the lyrics elapsed time composable (by @marcelveldt in [#2280](https://github.com/music-assistant/frontend/pull/2280))
+- Guard the startup order in the app initialization tests (by @marcelveldt in [#2285](https://github.com/music-assistant/frontend/pull/2285))
+- Clean up a stale queue lookup in the party guest page (by @marcelveldt in [#2286](https://github.com/music-assistant/frontend/pull/2286))
+- Make the self-closing tag lint rule actually run (by @marcelveldt in [#2287](https://github.com/music-assistant/frontend/pull/2287))
+- Fix Save button blocked by a setting you cannot fill in (by @marcelveldt in [#2284](https://github.com/music-assistant/frontend/pull/2284))
+- Handle settings action buttons in one shared place (by @marcelveldt in [#2281](https://github.com/music-assistant/frontend/pull/2281))
+- Document how a queue's active flag relates to the player's active source (by @marcelveldt in [#2282](https://github.com/music-assistant/frontend/pull/2282))
+- Fix the player progress bar standing still or starting at zero (by @marcelveldt in [#2279](https://github.com/music-assistant/frontend/pull/2279))
+- Make the pre-commit check fast again (by @marcelveldt in [#2277](https://github.com/music-assistant/frontend/pull/2277))
+
+### Other Changes
+
+- Keep ffmpeg's per-input read options with the input they belong to (by @marcelveldt in #5407)
+
+### 🧰 Maintenance and dependency bumps
+
+<details>
+<summary>28 changes</summary>
+
+- Notice when AI Radio loses its AI or text-to-speech engine (by @marcelveldt in #5309)
+- Only fail the dependency security check on vulnerabilities a PR introduces (by @marcelveldt in #5346)
+- Avoid duplicate provider requests for the same uncached data (by @marcelveldt in #5370)
+- Make the group mute command work on any player (by @marcelveldt in #5374)
+- Reattach a player control after it comes back (by @marcelveldt in #5377)
+- Only refetch the Home Assistant entity registry when a change can affect it (by @marcelveldt in #5378)
+- Keep a protocol's own setting dependencies when shown on a player (by @marcelveldt in #5382)
+- Add test coverage for protocol settings shown next to a player's own (by @marcelveldt in #5383)
+- Fix mismatched default when reading the preferred output protocol setting (by @marcelveldt in #5384)
+- ⬆️ Update music-assistant-frontend to 2.17.259 (by @musicassistant-bot[bot] in #5387)
+- ⬆️ Update music-assistant-models to 1.1.181 (by @musicassistant-bot[bot] in #5388)
+- Ard sounds rebrand (by @OzGav in #5389)
+- Show the real buffer depth default per device (by @marcelveldt in #5390)
+- Avoid redundant Sonos S1 speaker polls after commands (by @marcelveldt in #5394)
+- Accept AI quiz answers that arrive wrapped in a code fence (by @marcelveldt in #5395)
+- Make the Home Assistant registry-race tests wait for the actual fetch (by @marcelveldt in #5399)
+- Bound the Trivia quiz AI response the same way as the distractor parser (by @marcelveldt in #5400)
+- Use one shared rule for trusting album release info in Music Quiz (by @marcelveldt in #5401)
+- Don't demand a setup setting the user cannot fill in (by @marcelveldt in #5403)
+- Only announce the publish IP for network discovery (by @marcelveldt in #5411)
+- Remove unused extra_args parameter from ffmpeg helpers (by @marcelveldt in #5412)
+- Stop stream options from piling up on repeated plays of the same item (by @marcelveldt in #5414)
+- ⬆️ Update music-assistant-models to 1.1.182 (by @musicassistant-bot[bot] in #5419)
+- Fix playback position being dropped from the player state (by @marcelveldt in #5421)
+- Fix a misleading comment about player output settings (by @marcelveldt in #5423)
+- Make the streamserver's internal address list private (by @marcelveldt in #5425)
+- ⬆️ Update music-assistant-models to 1.1.183 (by @musicassistant-bot[bot] in #5427)
+- Document the native libraries needed to run the tests locally (by @marcelveldt in #5429)
+
+</details>
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @OzGav, @frjol, @jonasbp2011, @marcelveldt
+
 ## 2.10.0b11
 - Upstream Music Assistant server (beta) update to 2.10.0b11
 

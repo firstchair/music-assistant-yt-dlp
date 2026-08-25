@@ -1,3 +1,70 @@
+## 2.10.0rc6
+- Upstream Music Assistant server (beta) update to 2.10.0rc6
+
+### Upstream Release Notes
+## 📦 RC Release
+
+_Changes since [2.10.0rc5](https://github.com/music-assistant/server/releases/tag/2.10.0rc5)_
+
+### 🚀 Features and enhancements
+
+- Let Music Assistant mix crossfades for Spotify and other realtime sources (by @marcelveldt in #5960)
+- Show audio quality for external sources (by @marcelveldt in #5963)
+- Support next/previous controls on Google Cast devices (by @MarvinSchenkel in #5970)
+- Hide Sendspin token pairing method when PIN/code pairing is available (by @maximmaxim345 in #5975)
+- Show bit-perfect playback for external sources (by @marcelveldt in #5983)
+
+### 🐛 Bugfixes
+
+- Fix Flow Mode sample rate setting being locked for players with enforced flow mode (by @vintvinst in #5955)
+- Fix slow player response after pausing an external source (by @marcelveldt in #5961)
+- Announcements use the speaker's own announcement feature first (by @marcelveldt in #5974)
+- Fix mid-track silence on AirPlay receivers that need an explicit progress anchor (by @MarvinSchenkel in #5976)
+- Fix announcement volume and mute handling on AirPlay speakers (by @marcelveldt in #5977)
+
+### 🎨 Frontend Changes
+
+- Safer browser media controls (by @marcelveldt in [#2626](https://github.com/music-assistant/frontend/pull/2626))
+- Make crossfade details consistent (by @marcelveldt in [#2627](https://github.com/music-assistant/frontend/pull/2627))
+- Keep the Discover page in place when navigating back (by @MarvinSchenkel in [#2625](https://github.com/music-assistant/frontend/pull/2625))
+- Show audio quality for external sources (by @marcelveldt in [#2628](https://github.com/music-assistant/frontend/pull/2628))
+- Select a player once its setup/pairing flow finishes (by @maximmaxim345 in [#2642](https://github.com/music-assistant/frontend/pull/2642))
+- Remember the artist page view mode across all artists (by @MarvinSchenkel in [#2641](https://github.com/music-assistant/frontend/pull/2641))
+- Bump @lucide/vue from 1.31.0 to 1.33.0 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#2632](https://github.com/music-assistant/frontend/pull/2632))
+- Bump happy-dom from 20.11.1 to 20.11.6 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#2640](https://github.com/music-assistant/frontend/pull/2640))
+
+### Other Changes
+
+- Lokalise translations update (by @github-actions[bot] in #5966)
+
+### 🧰 Maintenance and dependency bumps
+
+<details>
+<summary>14 changes</summary>
+
+- Fix Spotify Connect quality reporting and a leftover audio process (by @marcelveldt in #5954)
+- Make publish IP tests reliable (by @marcelveldt in #5958)
+- ⬆️ Update music-assistant-models to 1.1.199 (by @musicassistant-bot[bot] in #5962)
+- ⬆️ Update music-assistant-frontend to 2.17.288 (by @musicassistant-bot[bot] in #5964)
+- Fix flaky AirPlay announcement timing tests (by @marcelveldt in #5967)
+- Bump hass-client to 1.3.1 (by @MarvinSchenkel in #5969)
+- Speed up the slowest AirPlay announcement test (by @marcelveldt in #5971)
+- Let audio analysis notice players that are not served over HTTP (by @marcelveldt in #5972)
+- Keep tracks of the same album gapless when crossfade is on (by @marcelveldt in #5973)
+- Tidy up process cleanup code (by @marcelveldt in #5980)
+- ⬆️ Update music-assistant-frontend to 2.17.289 (by @musicassistant-bot[bot] in #5982)
+- Count album plays started from a streaming service's own listings (by @marcelveldt in #5984)
+- Bump `aiosendspin` to 9.1.1 (by @maximmaxim345 in #5985)
+- ⬆️ Update music-assistant-frontend to 2.17.290 (by @musicassistant-bot[bot] in #5988)
+
+</details>
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @lucide, @marcelveldt, @maximmaxim345, @vintvinst
+
 ## 2.10.0rc5
 - Upstream Music Assistant server (beta) update to 2.10.0rc5
 

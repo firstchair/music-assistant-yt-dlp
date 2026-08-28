@@ -1,3 +1,96 @@
+## 2.11.0b0
+- Upstream Music Assistant server (beta) update to 2.11.0b0
+
+### Upstream Release Notes
+## 📦 Beta Release
+
+_Changes since [2.10.0rc7](https://github.com/music-assistant/server/releases/tag/2.10.0rc7)_
+
+### 🚀 Features and enhancements
+
+- Report completed plays back to Tidal (by @jozefKruszynski in #5835)
+- Improve local album and artist folder matching (by @marcelveldt in #5939)
+- Add an icon for the `sendspin_source` provider (by @maximmaxim345 in #6023)
+- Show pairing codes as dedicated input boxes (by @marcelveldt in #6028)
+- Remove the retired local audio provider on installs that never played through it (by @chrisuthe in #6029)
+- Give the server a configurable name and external URL (by @marcelveldt in #6031)
+- Approve new Sendspin devices with a single click (by @maximmaxim345 in #6035)
+- Enable Spotify Connect or AirPlay Receiver from the player's own settings (by @marcelveldt in #6042)
+- Keep other players' Spotify Connect and AirPlay devices alive when one daemon fails (by @marcelveldt in #6043)
+
+### 🐛 Bugfixes
+
+- Snapcast: resume music after an announcement (by @MarvinSchenkel in #5968)
+- Spotify Connect no longer disappears when a different account connects (by @marcelveldt in #6019)
+- Selecting a source no longer takes five seconds to start playing (by @marcelveldt in #6021)
+- Cancel in-flight finalizes before freeing analysis models (by @chrisuthe in #6024)
+- Retry Sonic Analysis when a track loses its CLAP windows (by @chrisuthe in #6034)
+- Keep the AirPlay connection alive when seeking (by @marcelveldt in #6050)
+- Fix an AirPlay speaker going silent when it joins a group (by @marcelveldt in #6051)
+- Fix an AirPlay speaker going silent when two things start it at once (by @marcelveldt in #6054)
+- Stop restarting an AirPlay speaker when a seek needs a moment (by @marcelveldt in #6055)
+- Keep the queue on an audio player when a group leader drops out (by @marcelveldt in #6056)
+- Fix a speaker staying silent after its group is joined with another one (by @marcelveldt in #6057)
+- Stop AirPlay speakers in a group immediately on pause or stop (by @marcelveldt in #6058)
+- Keep an AirPlay player's streaming mode under the user's control (by @marcelveldt in #6059)
+- Make seeking forward in a slow source fast (by @marcelveldt in #6060)
+- Add a 24-bit audio toggle for AirPlay players (by @marcelveldt in #6061)
+- Fix a group member never re-joining after it drops off the network (by @marcelveldt in #6062)
+- Fix a Spotify audiobook stopping when you seek to another chapter (by @marcelveldt in #6063)
+- Fix Spotify not loading after updating to 2.10 (by @kiegsgroot in #6065)
+- Fix the Apple TV progress bar disappearing after a track change (by @marcelveldt in #6067)
+- Fix YouTube Music search finding nothing when the language is not English (by @marcelveldt in #6068)
+- Fix grouping being unavailable while Spotify Connect plays (by @marcelveldt in #6070)
+- Stop the music when you power off a speaker (by @marcelveldt in #6074)
+- Stop random music playing after a notification clip (by @marcelveldt in #6075)
+
+### 🎨 Frontend Changes
+
+- Show pairing codes as dedicated input boxes (by @marcelveldt in [#2657](https://github.com/music-assistant/frontend/pull/2657))
+- No more STABLE badge when adding a provider (by @marcelveldt in [#2656](https://github.com/music-assistant/frontend/pull/2656))
+- Show server name, addresses and remote access on the About page (by @marcelveldt in [#2658](https://github.com/music-assistant/frontend/pull/2658))
+- Show audio inputs and devices that need setup (by @maximmaxim345 in [#2659](https://github.com/music-assistant/frontend/pull/2659))
+- Scope audio sources in Browse to the selected player (by @marcelveldt in [#2660](https://github.com/music-assistant/frontend/pull/2660))
+- Fix the mobile player blur on Chromium browsers (by @marcelveldt in [#2662](https://github.com/music-assistant/frontend/pull/2662))
+- One shared code input for remote ID and pairing codes (by @marcelveldt in [#2661](https://github.com/music-assistant/frontend/pull/2661))
+- Fix loading spinners showing up too small (by @marcelveldt in [#2669](https://github.com/music-assistant/frontend/pull/2669))
+- Check the Python package builds in CI (by @marcelveldt in [#2668](https://github.com/music-assistant/frontend/pull/2668))
+- Silence the setuptools warning about the assets directory (by @marcelveldt in [#2667](https://github.com/music-assistant/frontend/pull/2667))
+- Clean up the Python packaging config (by @marcelveldt in [#2666](https://github.com/music-assistant/frontend/pull/2666))
+- Remove the unused VS Code workspace file (by @marcelveldt in [#2665](https://github.com/music-assistant/frontend/pull/2665))
+- Remove the unused webhint config file (by @marcelveldt in [#2664](https://github.com/music-assistant/frontend/pull/2664))
+- Remove the unused browser targets config file (by @marcelveldt in [#2663](https://github.com/music-assistant/frontend/pull/2663))
+
+### 🧰 Maintenance and dependency bumps
+
+<details>
+<summary>16 changes</summary>
+
+- Hide the Sendspin legacy clients option (by @maximmaxim345 in #6025)
+- Set up Spotify Connect and AirPlay Receiver once and pick the players they serve (by @marcelveldt in #6026)
+- Use the new Sendspin mark for the provider icon (by @MarvinSchenkel in #6030)
+- Pairing texts now say 'pairing code' instead of 'PIN' (by @marcelveldt in #6033)
+- Update base image versions to 1.6.3 (by @marcelveldt in #6037)
+- Clean up snapcast mdns records when the provider unloads (by @marcelveldt in #6038)
+- Tidy up playback task handling when a Connect/AirPlay daemon is replaced (by @marcelveldt in #6040)
+- Fix release creation failing on very large release notes (by @marcelveldt in #6041)
+- Hide non-audio players from the scrobbler player picker (by @marcelveldt in #6044)
+- Keep a live source on its player when moving it to another one fails (by @marcelveldt in #6045)
+- Prevent accidental stable auto-release while a release candidate is pending (by @MarvinSchenkel in #6047)
+- Keep translation syncs and backport PRs out of the release notes (by @marcelveldt in #6048)
+- Bump CodSpeedHQ/action from 5.0.3 to 5.2.1 (by @dependabot[bot] in #6066)
+- Record why Spotify audiobook chapters cannot be fed ahead (by @marcelveldt in #6069)
+- Update airplay-cli to v0.5.3 (by @musicassistant-bot[bot] in #6071)
+- Tidy up the source lookup in the seek command (by @marcelveldt in #6072)
+
+</details>
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @chrisuthe, @jozefKruszynski, @kiegsgroot, @marcelveldt, @maximmaxim345
+
 ## 2.10.0
 - Upstream Music Assistant server (beta) update to 2.10.0
 

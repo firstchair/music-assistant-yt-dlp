@@ -21,9 +21,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Track BETA channel: latest non-draft, non-.dev release (beta or stable, whichever is newer)
-          UPSTREAM_VERSION=$(gh api 'repos/music-assistant/server/releases?per_page=30' \
-            --jq '[.[] | select(.draft == false) | select(.tag_name | test("\\.dev") | not)] | .[0].tag_name')
+          # Track BETA channel: highest non-draft, non-.dev release (beta or stable), by PEP 440
+          # version order. The API sorts by creation date, so a stable patch (e.g. 2.10.4)
+          # published after a beta (2.11.0b2) must not win.
+          pip install --quiet packaging
+          TAGS=$(gh api 'repos/music-assistant/server/releases?per_page=50' \
+            --jq '.[] | select(.draft == false) | select(.tag_name | test("\\.dev") | not) | .tag_name')
+          UPSTREAM_VERSION=$(printf '%s\n' "$TAGS" | python3 -c '
+          import sys
+          from packaging.version import Version, InvalidVersion
+          vs = []
+          for t in sys.stdin.read().split():
+              try: vs.append((Version(t), t))
+              except InvalidVersion: pass
+          print(max(vs)[1] if vs else "")
+          ')
 
           if [ -z "$UPSTREAM_VERSION" ] || [ "$UPSTREAM_VERSION" = "null" ]; then
             echo "Failed to resolve upstream version" >&2
@@ -41,12 +53,20 @@ jobs:
             CURRENT_VERSION=$(cat music_assistant_youtube_beta/.upstream-version)
           fi
 
-          if [ "$UPSTREAM_VERSION" != "$CURRENT_VERSION" ]; then
+          # Only move forward: never downgrade the beta channel
+          IS_NEWER=$(python3 -c '
+          import sys
+          from packaging.version import Version
+          new, cur = sys.argv[1], sys.argv[2]
+          print("true" if not cur or Version(new) > Version(cur) else "false")
+          ' "$UPSTREAM_VERSION" "$CURRENT_VERSION")
+
+          if [ "$IS_NEWER" = "true" ]; then
             echo "new_release=true" >> "$GITHUB_OUTPUT"
             echo "New BETA upstream release: $UPSTREAM_VERSION (was: $CURRENT_VERSION)"
           else
             echo "new_release=false" >> "$GITHUB_OUTPUT"
-            echo "Already up to date: $CURRENT_VERSION"
+            echo "Already up to date: $CURRENT_VERSION (highest upstream: $UPSTREAM_VERSION)"
           fi
 
   update:

@@ -57,7 +57,10 @@ def search_yt(
     opts = {**ydl_opts, "extract_flat": True, "skip_download": True}
     with yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(f"ytsearch{limit}:{query}", download=False)
-    return info.get("entries", []) if info else []
+    entries = info.get("entries", []) if info else []
+    # ytsearch can also return channel/playlist entries (ie_key "YoutubeTab");
+    # those have no playable video id and would fail as tracks.
+    return [e for e in entries if e.get("ie_key", "Youtube") == "Youtube"]
 
 
 def extract_video_info(

@@ -1,3 +1,30 @@
+## 2.11.0b7
+- Upstream Music Assistant server (beta) update to 2.11.0b7
+
+### Upstream Release Notes
+## 📦 Beta Release
+
+_Changes since [2.11.0b6](https://github.com/music-assistant/server/releases/tag/2.11.0b6)_
+
+### 🐛 Bugfixes
+
+- Stop a Sendspin player reporting a position ahead of what it is playing (by @caraar12345 in #6345)
+- Resume WiiM playback after the firmware restarts the stream on the first group join (by @MarvinSchenkel in #7157)
+- Stop cutting off YouTube Music and Spotify Soloist tracks on AirPlay in Sendspin groups (by @maximmaxim345 in #7160)
+- Bump aioaudiobookshelf to 0.2.1 (by @fmunkes in #7161)
+- Stop exposing the Jellyfin access token to API clients (by @MarvinSchenkel in #7164)
+- Fix Apple Music failing to load with an expired stored app token (by @MarvinSchenkel in #7165)
+
+### 🧰 Maintenance and dependency bumps
+
+- Stop the backport workflow from skipping a labelled PR merged seconds earlier (by @MarvinSchenkel in #7167)
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@MarvinSchenkel, @caraar12345, @fmunkes, @maximmaxim345
+
 ## 2.11.0b6
 - Upstream Music Assistant server (beta) update to 2.11.0b6
 

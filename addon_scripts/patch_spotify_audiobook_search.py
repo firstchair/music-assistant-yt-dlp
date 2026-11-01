@@ -1,13 +1,15 @@
 """Build-time patch: find Spotify audiobooks in Music Assistant search.
 
-In markets such as the Netherlands, Spotify's search API returns nothing for
-type=audiobook. The books come back as "shows" whose description starts with
-"Author(s): ... Narrator(s): ...", and Music Assistant drops those from the
-podcast results because they are audiobooks. So they appear nowhere.
+When the Spotify provider runs on a developer session (own client ID), Spotify's
+search API returns no audiobooks: neither for type=audiobook nor as shows. The
+same books do appear for Spotify's own client, and MA can load them by id
+(library sync and audiobook details work). MA already searches playlists on the
+"global" session for this reason.
 
 This appends a wrapper to MA's Spotify provider: when audiobooks are searched,
-it also searches shows, keeps the audiobook-shaped ones and loads them through
-the audiobooks endpoint (which does work there; library sync uses it).
+it also searches them on the global session and, failing that, looks for
+audiobook-shaped shows ("Author(s): ... Narrator(s): ...") and loads those
+through the audiobooks endpoint. It logs what it found at debug level.
 
 Run once while building the image. If MA's Spotify provider changed so the
 patch no longer fits, the original file is kept and the build continues.
@@ -34,22 +36,48 @@ def _fc_is_audiobook_show(item: dict[str, Any] | None) -> bool:
     return description.startswith("Author(s):") and "Narrator(s):" in description
 
 
-async def _fc_audiobooks_from_shows(
+async def _fc_search(
+    provider: SpotifyProvider, search_query: str, search_type: str, limit: int, use_global: bool
+) -> list[dict[str, Any]]:
+    api_result = await provider._get_data(
+        "search",
+        q=search_query.replace("'", ""),
+        type=search_type,
+        limit=limit,
+        offset=0,
+        use_global_session=use_global,
+    )
+    section = (api_result or {}).get(f"{search_type}s") or {}
+    return [item for item in section.get("items") or [] if item and item.get("id")]
+
+
+async def _fc_find_audiobooks(
     provider: SpotifyProvider, search_query: str, limit: int
 ) -> list[Audiobook]:
-    api_result = await provider._get_data(
-        "search", q=search_query.replace("'", ""), type="show", limit=limit, offset=0
+    use_global = bool(getattr(provider, "dev_session_active", False))
+    items = await _fc_search(provider, search_query, "audiobook", limit, use_global)
+    books = [parse_audiobook(item, provider) for item in items]
+    shows = await _fc_search(provider, search_query, "show", limit, use_global)
+    show_ids = [item["id"] for item in shows if _fc_is_audiobook_show(item)]
+    known = {book.item_id for book in books}
+    show_ids = [show_id for show_id in show_ids if show_id not in known]
+    if show_ids:
+        data = await provider._get_data("audiobooks", ids=",".join(show_ids[:50]))
+        books += [
+            parse_audiobook(item, provider)
+            for item in (data or {}).get("audiobooks") or []
+            if item and item.get("id")
+        ]
+    provider.logger.debug(
+        "Audiobook search %r (global session: %s): %s audiobook result(s), "
+        "%s show result(s) of which %s audiobook-shaped",
+        search_query,
+        use_global,
+        len(items),
+        len(shows),
+        len(show_ids),
     )
-    shows = (api_result or {}).get("shows") or {}
-    ids = [item["id"] for item in shows.get("items") or [] if _fc_is_audiobook_show(item)]
-    if not ids:
-        return []
-    data = await provider._get_data("audiobooks", ids=",".join(ids[:50]))
-    return [
-        parse_audiobook(item, provider)
-        for item in (data or {}).get("audiobooks") or []
-        if item and item.get("id")
-    ]
+    return books
 
 
 def _fc_patch_audiobook_search() -> None:
@@ -68,14 +96,13 @@ def _fc_patch_audiobook_search() -> None:
         if not self.audiobooks_supported:
             return result
         try:
-            books = await _fc_audiobooks_from_shows(self, search_query, limit)
+            books = await _fc_find_audiobooks(self, search_query, limit)
         except Exception as err:  # noqa: BLE001 - never break search over this
-            self.logger.debug("Audiobook search via shows failed: %s", err)
+            self.logger.debug("Extra audiobook search failed: %s", err)
             return result
         known = {book.item_id for book in result.audiobooks}
         extra = [book for book in books if book.item_id not in known]
         if extra:
-            self.logger.debug("Found %s audiobook(s) via show search", len(extra))
             result.audiobooks = [*result.audiobooks, *extra]
         return result
 
@@ -90,6 +117,7 @@ REQUIRED_NAMES = (
     "class SpotifyProvider(",
     "async def search(",
     "async def _get_data(",
+    "use_global_session",
     "parse_audiobook",
     "def audiobooks_supported",
     "MediaType",

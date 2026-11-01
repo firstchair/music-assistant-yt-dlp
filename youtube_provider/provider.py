@@ -60,6 +60,7 @@ from .helpers import (
     search_yt,
 )
 from .parsers import parse_channel_as_artist, parse_playlist, parse_playlist_as_album, parse_track
+from .url_utils import resolve_youtube_search_target
 from .youtube_api import (
     YouTubeDataAPIError,
     api_get_channel,
@@ -163,6 +164,23 @@ class YouTubeProvider(MusicProvider):
         :param media_types: A list of media_types to include.
         :param limit: Number of items to return in the search (per type).
         """
+        if target := resolve_youtube_search_target(search_query):
+            target_type, target_id = target
+            if target_type == "track":
+                if MediaType.TRACK not in media_types:
+                    return SearchResults(tracks=[], artists=[], playlists=[])
+                try:
+                    track = await self.get_track(target_id)
+                except MediaNotFoundError:
+                    return SearchResults(tracks=[], artists=[], playlists=[])
+                return SearchResults(tracks=[track], artists=[], playlists=[])
+            if MediaType.PLAYLIST not in media_types:
+                return SearchResults(tracks=[], artists=[], playlists=[])
+            try:
+                playlist = await self.get_playlist(target_id)
+            except MediaNotFoundError:
+                return SearchResults(tracks=[], artists=[], playlists=[])
+            return SearchResults(tracks=[], artists=[], playlists=[playlist])
         tracks: list[Track] = []
         artists: list[Artist] = []
         playlists: list[Playlist] = []
@@ -278,7 +296,12 @@ class YouTubeProvider(MusicProvider):
         """Return stream details for the given track.
 
         Handles both regular videos (HTTP direct URL) and live streams (HLS)
-        in a single yt-dlp extraction. VOD tracks use the on-disk cache when enabled.
+        in a single yt-dlp extraction.
+
+        VOD tracks stream straight from the direct HTTP URL so playback starts
+        without waiting for a full download. When the file cache is enabled the
+        track is also downloaded to disk in the background, so the *next* play of
+        this track hits the local cache and starts instantly.
         """
         if self._file_cache:
             cached = await asyncio.to_thread(self._file_cache.get_hit, item_id)
@@ -292,17 +315,12 @@ class YouTubeProvider(MusicProvider):
         if result.get("is_live"):
             return self._build_live_stream_details(item_id, result)
 
+        self._schedule_prefetch(item_id)
         if self._file_cache:
-            try:
-                cached = await self._download_and_cache(item_id, result)
-                self._schedule_prefetch(item_id)
-                return self._build_cached_stream_details(item_id, cached)
-            except Exception as err:
-                self.logger.warning(
-                    "File cache failed for %s, falling back to remote stream: %s",
-                    item_id,
-                    err,
-                )
+            # Populate the cache in the background instead of blocking playback
+            # on a full download. A second concurrent request for the same item
+            # is rejected by the download lock and ignored by the caller.
+            self._schedule_background_cache(item_id, result)
 
         return self._build_vod_stream_details(item_id, result)
 
@@ -431,6 +449,26 @@ class YouTubeProvider(MusicProvider):
         task = asyncio.create_task(self._prefetch_upcoming(current_item_id))
         self._prefetch_tasks.add(task)
         task.add_done_callback(self._prefetch_tasks.discard)
+
+    def _schedule_background_cache(self, item_id: str, result: dict[str, Any]) -> None:
+        """Download a VOD to the file cache in the background without blocking playback."""
+        if not self._file_cache:
+            return
+        task = asyncio.create_task(self._download_to_cache(item_id, result))
+        self._prefetch_tasks.add(task)
+        task.add_done_callback(self._prefetch_tasks.discard)
+
+    async def _download_to_cache(self, item_id: str, result: dict[str, Any]) -> None:
+        """Best-effort background download into the file cache.
+
+        Failures (including the download lock rejecting a concurrent request) are
+        swallowed: the track still plays from the HTTP URL and the next request
+        will retry the cache.
+        """
+        try:
+            await self._download_and_cache(item_id, result)
+        except Exception as err:  # noqa: BLE001 - never block a play on caching
+            self.logger.debug("Background cache download failed for %s: %s", item_id, err)
 
     def _video_id_for_instance(self, media_item: Any) -> str | None:
         """Return YouTube video ID from a media item if it belongs to this provider."""

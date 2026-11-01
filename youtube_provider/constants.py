@@ -9,12 +9,19 @@ CONF_CACHE_ENABLED = "cache_enabled"
 CONF_CACHE_DIR = "cache_dir"
 CONF_CACHE_MAX_SIZE_MB = "cache_max_size_mb"
 CONF_ACTION_CLEAR_CACHE = "clear_cache"
+CONF_POT_SERVER_URL = "pot_server_url"
 
 DEFAULT_PLAYLIST_LIMIT = 25
 DEFAULT_CACHE_ENABLED = True
 DEFAULT_CACHE_DIR = "/media/music-assistant-youtube-cache"
 DEFAULT_CACHE_MAX_SIZE_MB = 2048  # 0 = unlimited
 PREFETCH_AHEAD = 3
+
+# bgutil PO token provider: yt-dlp plugin + the HTTP server it talks to (e.g. the
+# "YT Music PO Token Generator" add-on, which publishes port 4416 on the host).
+# The plugin's major version must match the server's.
+POT_PLUGIN_REQUIREMENT = "bgutil-ytdlp-pot-provider>=2,<3"
+DEFAULT_POT_SERVER_URL = "http://127.0.0.1:4416"
 
 YT_DATA_API_BASE = "https://www.googleapis.com/youtube/v3"
 

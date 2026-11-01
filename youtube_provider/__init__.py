@@ -24,10 +24,12 @@ from .constants import (
     CONF_CACHE_MAX_SIZE_MB,
     CONF_COOKIES,
     CONF_PLAYLIST_LIMIT,
+    CONF_POT_SERVER_URL,
     DEFAULT_CACHE_DIR,
     DEFAULT_CACHE_ENABLED,
     DEFAULT_CACHE_MAX_SIZE_MB,
     DEFAULT_PLAYLIST_LIMIT,
+    DEFAULT_POT_SERVER_URL,
     SUPPORTED_FEATURES,
 )
 from .file_cache import FileCache
@@ -112,6 +114,23 @@ async def get_config_entries(
                 "Leave empty for public content only."
             ),
             required=False,
+        ),
+        ConfigEntry(
+            key=CONF_POT_SERVER_URL,
+            type=ConfigEntryType.STRING,
+            label="PO token server URL",
+            description=(
+                "URL of a bgutil PO token server, such as the 'YT Music PO Token "
+                "Generator' add-on. YouTube increasingly requires PO tokens; without "
+                "them streams can be throttled or cut off. The add-on publishes port "
+                "4416 on the host, which Music Assistant reaches at the default URL. "
+                "Leave empty to disable PO tokens."
+            ),
+            required=False,
+            default_value=DEFAULT_POT_SERVER_URL,
+            value=values.get(CONF_POT_SERVER_URL, DEFAULT_POT_SERVER_URL)
+            if values
+            else DEFAULT_POT_SERVER_URL,
         ),
         ConfigEntry(
             key=CONF_CACHE_ENABLED,

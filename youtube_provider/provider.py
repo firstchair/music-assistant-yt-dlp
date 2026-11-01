@@ -38,11 +38,14 @@ from .constants import (
     CONF_CACHE_MAX_SIZE_MB,
     CONF_COOKIES,
     CONF_PLAYLIST_LIMIT,
+    CONF_POT_SERVER_URL,
     DEFAULT_CACHE_DIR,
     DEFAULT_CACHE_ENABLED,
     DEFAULT_LIVE_STREAM_URL_EXPIRATION,
     DEFAULT_PLAYLIST_LIMIT,
+    DEFAULT_POT_SERVER_URL,
     DEFAULT_STREAM_URL_EXPIRATION,
+    POT_PLUGIN_REQUIREMENT,
     PREFETCH_AHEAD,
 )
 from .file_cache import CachedStreamInfo, FileCache
@@ -101,6 +104,10 @@ class YouTubeProvider(MusicProvider):
             except OSError as err:
                 self.logger.warning("File cache disabled: cannot use %s: %s", self._file_cache.cache_dir, err)
                 self._file_cache = None
+        if self._pot_server_url:
+            self.logger.info("Using PO token server at %s", self._pot_server_url)
+        else:
+            self.logger.info("PO token server disabled")
         if self.config.get_value(CONF_API_KEY):
             self.logger.info("YouTube Data API key configured, using API for search/metadata")
         else:
@@ -127,10 +134,16 @@ class YouTubeProvider(MusicProvider):
         self.logger.info("Using yt-dlp %s", version)
 
     async def _upgrade_yt_dlp(self) -> bool:
-        """Upgrade yt-dlp in place, returning True when the upgrade succeeded."""
+        """Upgrade yt-dlp and the PO token plugin, returning True on success."""
         try:
             return_code, output = await check_output(
-                "uv", "pip", "install", "--no-cache", "--upgrade", "yt-dlp[default]"
+                "uv",
+                "pip",
+                "install",
+                "--no-cache",
+                "--upgrade",
+                "yt-dlp[default]",
+                POT_PLUGIN_REQUIREMENT,
             )
         except Exception as err:  # noqa: BLE001 - never block setup on the upgrade path
             self.logger.warning("Could not upgrade yt-dlp: %s", err)
@@ -716,6 +729,14 @@ class YouTubeProvider(MusicProvider):
                 },
             },
         }
+        if self._pot_server_url:
+            opts["extractor_args"]["youtubepot-bgutilhttp"] = {
+                "base_url": [self._pot_server_url],
+            }
+        else:
+            # The bgutil plugin is installed regardless; stop it from probing
+            # its default server when PO tokens are switched off.
+            opts["extractor_args"]["youtube"]["fetch_pot"] = ["never"]
         if has_cookies:
             # With cookies: web_music is best for audio, web as fallback, tv
             # for "made for kids" content.
@@ -735,6 +756,14 @@ class YouTubeProvider(MusicProvider):
                 "Configure cookies for more reliable playback."
             )
         return opts
+
+    @property
+    def _pot_server_url(self) -> str:
+        """Return the PO token server URL, or an empty string when disabled."""
+        raw = self.config.get_value(CONF_POT_SERVER_URL)
+        if raw is None:
+            return DEFAULT_POT_SERVER_URL
+        return str(raw).strip().rstrip("/")
 
 
 def _to_netscape_cookies(cookies: str) -> str:

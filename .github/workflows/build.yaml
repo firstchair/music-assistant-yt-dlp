@@ -7,6 +7,7 @@ on:
       - "music_assistant_youtube/**"
       - "music_assistant_youtube_beta/**"
       - "youtube_provider/**"
+      - "addon_scripts/**"
       - ".github/workflows/build.yaml"
   workflow_dispatch:
   workflow_call:

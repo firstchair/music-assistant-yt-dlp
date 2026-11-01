@@ -36,20 +36,30 @@ _fc_pathfinder = _FcPathfinderClient()
 
 
 async def _fc_load_audiobooks(provider: SpotifyProvider, ids: list[str]) -> list[Audiobook]:
-    data = await provider._get_data("audiobooks", ids=",".join(ids[:50]))
-    by_id = {
-        item["id"]: item for item in (data or {}).get("audiobooks") or [] if item and item.get("id")
-    }
-    for audiobook_id in ids:
-        if audiobook_id not in by_id:
-            item = await provider._get_data(f"audiobooks/{audiobook_id}")
-            if item and item.get("id"):
-                by_id[audiobook_id] = item
-    return [
-        parse_audiobook(by_id[audiobook_id], provider)
-        for audiobook_id in ids
-        if audiobook_id in by_id
+    # Not every Spotify account may load every audiobook (the Web API answers
+    # null/404 for some accounts). MA searches through one Spotify instance, so
+    # load what it cannot through the other Spotify instances.
+    candidates = [provider] + [
+        other
+        for other in provider.mass.get_providers()
+        if isinstance(other, SpotifyProvider)
+        and other is not provider
+        and other.audiobooks_supported
     ]
+    loaded: dict[str, Audiobook] = {}
+    for candidate in candidates:
+        missing = [audiobook_id for audiobook_id in ids if audiobook_id not in loaded]
+        if not missing:
+            break
+        try:
+            data = await candidate._get_data("audiobooks", ids=",".join(missing[:50]))
+        except Exception as err:  # noqa: BLE001 - try the next instance
+            candidate.logger.debug("Pathfinder audiobook load failed: %s", err)
+            continue
+        for item in (data or {}).get("audiobooks") or []:
+            if item and item.get("id") in missing:
+                loaded[item["id"]] = parse_audiobook(item, candidate)
+    return [loaded[audiobook_id] for audiobook_id in ids if audiobook_id in loaded]
 
 
 async def _fc_find_audiobooks(

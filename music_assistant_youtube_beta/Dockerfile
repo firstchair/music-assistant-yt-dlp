@@ -16,7 +16,7 @@ RUN SITE_PKGS=$(python3 -c "import music_assistant, pathlib; print(pathlib.Path(
 COPY addon_scripts/firstchair-export addon_scripts/firstchair-import /usr/local/bin/
 RUN chmod +x /usr/local/bin/firstchair-export /usr/local/bin/firstchair-import
 
-# Make Spotify audiobooks findable in search (NL market returns them as shows).
+# Make Spotify audiobooks findable in search (the Web API search misses them in NL).
 # Skips itself if MA's Spotify provider changed; never fails the build.
-COPY addon_scripts/patch_spotify_audiobook_search.py /tmp/
-RUN python3 /tmp/patch_spotify_audiobook_search.py && rm /tmp/patch_spotify_audiobook_search.py
+COPY addon_scripts/patch_spotify_audiobook_search.py addon_scripts/spotify_pathfinder.py /tmp/fc_spotify/
+RUN python3 /tmp/fc_spotify/patch_spotify_audiobook_search.py && rm -rf /tmp/fc_spotify

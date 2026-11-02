@@ -1,3 +1,171 @@
+## 2.11.0b8
+- Upstream Music Assistant server (beta) update to 2.11.0b8
+
+### Upstream Release Notes
+## 📦 Beta Release
+
+_Changes since [2.11.0b7](https://github.com/music-assistant/server/releases/tag/2.11.0b7)_
+
+### 🚀 New Providers
+
+- Add WLED Audio Sync plugin provider (by @netmindz in #5537)
+- Add BookOrbit audiobook music provider (by @justinwoodland in #7009)
+- Add FIP provider with live song details for FIP and its webradios (by @culmat in #7182)
+- Add a Local metadata provider for a Kodi style artist information folder (by @OzGav in #7190)
+
+### 🚀 Features and enhancements
+
+- Jellyfin replaygain tags (by @Florin-Popescu in #4784)
+- Allow impersonation on item reads and recommendations (by @fmunkes in #6802)
+- Allow impersonation on playlist edits, queue commands and lyrics (by @fmunkes in #6809)
+- Add AI generated covers and descriptions to the Playlist Metadata provider (by @ryanmac8 in #6901)
+- Add a similar artists Autoplay mode (by @szsolt in #6940)
+- Add the ability to reorder Tidal playlists (by @apophisnow in #7162)
+- Add a command to move several playlist tracks as one block (by @apophisnow in #7163)
+- Compute the metadata of collapsed collections over all their items (by @fmunkes in #7170)
+- Let a Raumfeld group restart its stream when a room joins (by @Simanias in #7179)
+- Auto pair Sendspin clients through Home Assistant (by @arturpragacz in #7181)
+- Move YouSee Musik onto the shared 24-7 code (by @OzGav in #7192)
+- Keep the Raumfeld renderers' UPnP actions, so switching stations starts a second sooner (by @culmat in #7198)
+- Raumfeld: restart at once for a joined room that cannot hook into the stream (by @Simanias in #7214)
+- Update Yandex Station provider to v1.5.24: option to stop mirroring Station volume to the intercept target (by @trudenboy in #7215)
+- Raumfeld: show each track's cover, artist and album in the Raumfeld app in flow mode (by @Simanias in #7216)
+- Raumfeld: default ICY metadata to basic (by @Simanias in #7218)
+- Explain missing line-in autostart on Sendspin devices (by @maximmaxim345 in #7225)
+- Update ABC Radio Network Provider to support multiple states in Australia (by @genesispc in #7226)
+- Update FastMCP Server provider to v2.2.8: provider-registered commands, 401 resource metadata, guest token refusal (by @trudenboy in #7227)
+- Ask for the line-in autostart target when setting up Sendspin devices (by @maximmaxim345 in #7229)
+- Update Yandex Station provider to v1.7.9: Alice speech API commands and report-driven playback state (by @trudenboy in #7242)
+- Identify more tracks on MusicBrainz by their ISRC (by @OzGav in #7261)
+- Match an album's tracks to MusicBrainz in order when the whole album lines up (by @OzGav in #7262)
+- Keep BookOrbit listening progress in the Music Assistant playlog (by @justinwoodland in #7281)
+- Return every bucket in plays over time (by @stvncode in #7282)
+- Return the artist with each listening time result (by @stvncode in #7283)
+- Show song details from Italian RadioMediaset radio stations (by @OzGav in #7297)
+- Show Qobuz editorial album lists as Discover recommendation rows (by @RobinFrcd in #7301)
+- Match tracks to MusicBrainz when MusicBrainz links the album (by @OzGav in #7314)
+- Add a Qobuz Discover row with new releases from your favorite artists (by @RobinFrcd in #7317)
+- Support moving a track within a Deezer playlist (by @jdaberkow in #7319)
+- Allow multiple Pocket Casts instances (by @OzGav in #7328)
+- Add an experimental fast stream profile to YouTube Music (by @MarvinSchenkel in #7331)
+- Filter an artist's discography by release type (by @OzGav in #7332)
+
+### 🐛 Bugfixes
+
+- Handle Sonos coordinator moves, session takeovers and announcement clip status (by @mnestrud in #6779)
+- Keep radio playing when its stream url expires (by @MarvinSchenkel in #6959)
+- Don't fail HEOS setup when one device's inputs can't be browsed (by @OzGav in #7114)
+- Keep a track's length after its queue moves to another player (by @Simanias in #7136)
+- Fix short dropouts on SiriusXM and other HLS radio (by @MarvinSchenkel in #7139)
+- Play a Raumfeld group at a sample rate each of its rooms plays (by @Simanias in #7148)
+- Keep a Universal Player's id when a stale native player claims its protocol (by @MarvinSchenkel in #7156)
+- Stop pushing metadata to legacy AirPlay receivers that advertise none (by @OzGav in #7168)
+- Give the Raumfeld host 10 s and three tries before dropping the connection (by @culmat in #7171)
+- Fix Nicovideo playback and track details after the watch API change (by @Shi-553 in #7184)
+- Report no song position for a stream that gives its song's duration but no position (by @culmat in #7187)
+- Show the station image when a Live365 station has no track cover (by @OzGav in #7188)
+- Run tini as PID 1 so orphaned child processes are reaped (by @cateim in #7191)
+- Standardise User Agent to fix podcast episodes failing with 403 (by @OzGav in #7193)
+- Raumfeld: don't poll a room the host no longer lists (by @Simanias in #7194)
+- Chromecast: offer a cast app the controls it can take (by @Simanias in #7196)
+- Tell Music Assistant FIP's streams are 48 kHz, so they are not resampled twice (by @culmat in #7197)
+- Skip sonic analysis for audiobooks, podcasts and radio (by @OzGav in #7199)
+- Fix Apple Music track lookup for library IDs (by @anthonws in #7203)
+- Fix Qobuz performer names, paging and artists known only by name (by @OzGav in #7211)
+- Follow artists and albums MusicBrainz merged into others (by @OzGav in #7212)
+- Update Yandex Smart Home provider to v2.2.12: fix Direct-mode setup, setup-flow wording and test coverage (by @trudenboy in #7219)
+- Fix Bluesound metadata for library playback without an input ID (by @imoamo72 in #7221)
+- Fix adding library audiobooks to builtin playlists (by @fmunkes in #7241)
+- Show why LRCLIB lookups fail and stop retrying them in background scans (by @MarvinSchenkel in #7243)
+- Fix Spotify on Soloist stopping the queue at the end of every track (by @MarvinSchenkel in #7244)
+- Pick the Cast HTTP profile default per receiver model (by @MarvinSchenkel in #7245)
+- Keep other music sources' images when a library item is overwritten (by @GoatsAndMonkeys in #7246)
+- Stop the MusicBrainz link run reporting merged items as failed (by @OzGav in #7248)
+- Fix disconnected players showing as available and playing (by @MarvinSchenkel in #7249)
+- Fix Snapcast queue not advancing to the next track (by @MarvinSchenkel in #7250)
+- Fix Snapcast skipping music during an announcement (by @MarvinSchenkel in #7252)
+- Fix Snapcast cutting off the end of short announcements (by @MarvinSchenkel in #7253)
+- Fix Snapcast playing old audio when replaying after a stop (by @MarvinSchenkel in #7254)
+- Link a playlist item's genres to the item's own media type (by @GoatsAndMonkeys in #7255)
+- Show each item once in recently played (by @GoatsAndMonkeys in #7257)
+- Offer overlay volumes of a container as media locations (by @GoatsAndMonkeys in #7258)
+- Fix NetEase Cloud Music bitrate unit (bps to kbps) (by @lcisconl in #7263)
+- Fix a restarted Squeezelite group member staying silent (by @MarvinSchenkel in #7264)
+- Stop showing a disconnected player's queue as playing (by @MarvinSchenkel in #7265)
+- Fix WiiM position not updating for up to 30 s after playback starts (by @MarvinSchenkel in #7266)
+- Fix Snapcast timing with an external Snapserver (by @MarvinSchenkel in #7267)
+- Release a disconnected player's prepared audio and pending next-track work (by @MarvinSchenkel in #7268)
+- Fix Snapcast playing the old track for seconds after next (by @MarvinSchenkel in #7269)
+- Show the TV input as the active source when a WiiM switches away from MA (by @GoatsAndMonkeys in #7270)
+- Send album art to Home Assistant DLNA players (by @GoatsAndMonkeys in #7272)
+- Fix Snapcast elapsed time after a native announcement (by @MarvinSchenkel in #7275)
+- Fix Squeezelite group skipping the playing track after an announcement on a member (by @MarvinSchenkel in #7276)
+- Fix resume restarting the track after a longer pause on players without native pause (by @MarvinSchenkel in #7277)
+- Improve Listenbrainz_scrobble setup failure handling (by @Tommatheussen in #7279)
+- Fix squeezelite position jumping ahead after resume or seek (by @MarvinSchenkel in #7280)
+- Stop the Snapcast queue when its player goes unavailable (by @MarvinSchenkel in #7284)
+- Fill in a track's recording codes when it is refreshed (by @OzGav in #7302)
+- Stop tracks running short by storing the content length only for streams that ran to their end (by @mnestrud in #7306)
+- Refetch track lyrics on a forced metadata refresh (by @OzGav in #7313)
+- Fix a speaker group staying silent after its leader drops offline (by @marcelveldt in #7320)
+- ytmusicapi fails on uploaded album playlist (by @whitty in #7330)
+- Fix moving tracks in a Deezer playlist with an unavailable track (by @jdaberkow in #7333)
+
+### 🎨 Frontend Changes
+
+- Bump zod from 4.6.5 to 4.6.6 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3045](https://github.com/music-assistant/frontend/pull/3045))
+- Bump dompurify from 3.4.16 to 3.4.17 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3044](https://github.com/music-assistant/frontend/pull/3044))
+- Bump @vitest/ui from 5.0.0 to 5.0.5 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3043](https://github.com/music-assistant/frontend/pull/3043))
+- Avoid background refresh to clear the name field in MusicQuiz (by @TimoPtr in [#2944](https://github.com/music-assistant/frontend/pull/2944))
+- Stop detail pages flashing while an item is refreshed (by @OzGav in [#3048](https://github.com/music-assistant/frontend/pull/3048))
+- Bump happy-dom from 20.11.6 to 21.0.4 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3046](https://github.com/music-assistant/frontend/pull/3046))
+- Show song progress in radio stream when available (by @culmat in [#3042](https://github.com/music-assistant/frontend/pull/3042))
+- Select a range of items with shift-click (by @apophisnow in [#3037](https://github.com/music-assistant/frontend/pull/3037))
+- Hide the artist endless mix for authors and narrators (by @fmunkes in [#3013](https://github.com/music-assistant/frontend/pull/3013))
+- Keep source-only Sendspin devices in the player menu until they're set up (by @maximmaxim345 in [#3051](https://github.com/music-assistant/frontend/pull/3051))
+- Move the delete and disable user dialogs to shadcn-vue (by @pierosavi in [#3036](https://github.com/music-assistant/frontend/pull/3036))
+- Bump vue-tsc from 3.3.11 to 3.3.13 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3057](https://github.com/music-assistant/frontend/pull/3057))
+- Bump vite-plugin-pwa from 1.3.0 to 2.0.0 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3062](https://github.com/music-assistant/frontend/pull/3062))
+- Bump eslint from 10.11.0 to 10.13.0 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3061](https://github.com/music-assistant/frontend/pull/3061))
+- Bump oxlint and eslint-plugin-oxlint (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3060](https://github.com/music-assistant/frontend/pull/3060))
+- Bump vitest from 5.0.3 to 5.0.5 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3059](https://github.com/music-assistant/frontend/pull/3059))
+- Bump vue-i18n from 11.4.14 to 11.4.16 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3058](https://github.com/music-assistant/frontend/pull/3058))
+- Bump marked from 18.0.14 to 18.1.1 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3056](https://github.com/music-assistant/frontend/pull/3056))
+- Bump typescript-eslint from 8.71.0 to 8.72.0 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3055](https://github.com/music-assistant/frontend/pull/3055))
+- Bump @lucide/vue from 1.51.0 to 1.61.0 (by @[dependabot[bot]](https://github.com/apps/dependabot) in [#3063](https://github.com/music-assistant/frontend/pull/3063))
+- Show library sort, view and filters in the title bar (by @stvncode in [#3065](https://github.com/music-assistant/frontend/pull/3065))
+- Merge thumbs view compact into thumbs view (by @pierosavi in [#2926](https://github.com/music-assistant/frontend/pull/2926))
+- Expose selected-player volume commands to the companion app (by @teancom in [#3066](https://github.com/music-assistant/frontend/pull/3066))
+- Replace the Vuetify Container wrapper with plain elements (by @pierosavi in [#3073](https://github.com/music-assistant/frontend/pull/3073))
+
+### 🧰 Maintenance and dependency bumps
+
+<details>
+<summary>14 changes</summary>
+
+- Share the login and SSL config keys across providers (by @afeldman1 in #7177)
+- Add documentation link to MusicBrainz manifest (by @OzGav in #7189)
+- Bump aiosonos from 0.1.14 to 0.1.15 in the music-assistant-libs group (by @dependabot[bot] in #7205)
+- Bump pytest-cov from 7.0.0 to 7.1.0 (by @dependabot[bot] in #7206)
+- Bump soco from 0.31.2 to 0.32.0 (by @dependabot[bot] in #7207)
+- Bump fastmcp from 4.1.0 to 4.1.3 (by @dependabot[bot] in #7208)
+- Bump CodSpeedHQ/action from 5.5.0 to 5.6.0 (by @dependabot[bot] in #7230)
+- Bump docker/login-action from 4.6.0 to 4.7.0 (by @dependabot[bot] in #7231)
+- Bump astral-sh/setup-uv from 10.3.0 to 10.3.2 (by @dependabot[bot] in #7232)
+- Bump actions/setup-python from 7.0.0 to 7.1.0 (by @dependabot[bot] in #7233)
+- Let the critical-review gate act on Bot-MArley's findings (by @chrisuthe in #7300)
+- Fix Spotify stopping for good after a speaker gives up on a track (by @marcelveldt in #7310)
+- Bump the music-assistant-libs group with 2 updates (by @dependabot[bot] in #7323)
+- Bump audible from 0.13.0 to 0.13.1 (by @dependabot[bot] in #7326)
+
+</details>
+
+## :bow: Thanks to our contributors
+
+Special thanks to the following contributors who helped with this release:
+
+@Florin-Popescu, @GoatsAndMonkeys, @MarvinSchenkel, @OzGav, @RobinFrcd, @Shi-553, @Simanias, @TimoPtr, @Tommatheussen, @afeldman1, @anthonws, @apophisnow, @arturpragacz, @cateim, @chrisuthe, @culmat, @fmunkes, @genesispc, @imoamo72, @jdaberkow, @justinwoodland, @lcisconl, @lucide, @marcelveldt, @maximmaxim345, @mnestrud, @netmindz, @pierosavi, @ryanmac8, @stvncode, @szsolt, @teancom, @trudenboy, @vitest, @whitty
+
 ## 2.11.0b7
 - Upstream Music Assistant server (beta) update to 2.11.0b7
 

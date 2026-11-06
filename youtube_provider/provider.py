@@ -178,22 +178,21 @@ class YouTubeProvider(MusicProvider):
         :param limit: Number of items to return in the search (per type).
         """
         if target := resolve_youtube_search_target(search_query):
+            # an unknown id falls through to a normal search, since a bare id
+            # might also be an ordinary search word
             target_type, target_id = target
             if target_type == "track":
                 if MediaType.TRACK not in media_types:
                     return SearchResults(tracks=[], artists=[], playlists=[])
-                try:
+                with contextlib.suppress(MediaNotFoundError, self._yt_dlp.utils.DownloadError):
                     track = await self.get_track(target_id)
-                except MediaNotFoundError:
+                    return SearchResults(tracks=[track], artists=[], playlists=[])
+            else:
+                if MediaType.PLAYLIST not in media_types:
                     return SearchResults(tracks=[], artists=[], playlists=[])
-                return SearchResults(tracks=[track], artists=[], playlists=[])
-            if MediaType.PLAYLIST not in media_types:
-                return SearchResults(tracks=[], artists=[], playlists=[])
-            try:
-                playlist = await self.get_playlist(target_id)
-            except MediaNotFoundError:
-                return SearchResults(tracks=[], artists=[], playlists=[])
-            return SearchResults(tracks=[], artists=[], playlists=[playlist])
+                with contextlib.suppress(MediaNotFoundError, self._yt_dlp.utils.DownloadError):
+                    playlist = await self.get_playlist(target_id)
+                    return SearchResults(tracks=[], artists=[], playlists=[playlist])
         tracks: list[Track] = []
         artists: list[Artist] = []
         playlists: list[Playlist] = []

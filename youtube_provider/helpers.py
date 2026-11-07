@@ -318,6 +318,24 @@ def _extract_stream_or_live_once(
         raise UnplayableMediaError(f"No audio stream found for {video_id}")
 
 
+# YouTube hands out stream URLs that only start working a few seconds after
+# extraction (yt-dlp reports this as ``available_at``); fetching earlier gets a
+# 403. Never wait longer than this, so a bogus timestamp can't stall playback.
+MAX_AVAILABILITY_WAIT = 30.0
+
+
+def seconds_until_available(stream_format: dict[str, Any]) -> float:
+    """Return how long to wait before the stream URL of this format may be fetched."""
+    available_at = stream_format.get("available_at")
+    if not available_at:
+        return 0.0
+    try:
+        wait = float(available_at) - time.time()
+    except (TypeError, ValueError):
+        return 0.0
+    return min(max(wait, 0.0), MAX_AVAILABILITY_WAIT)
+
+
 def _format_selector_for_stream(stream_format: dict[str, Any]) -> str:
     """Build a yt-dlp format selector for a previously selected stream format."""
     format_id = stream_format.get("format_id")
@@ -385,6 +403,8 @@ def download_audio_to_path(
     watch_url = f"{YT_DOMAIN}/watch?v={video_id}"
     try:
         if stream_url:
+            if wait := seconds_until_available(stream_format):
+                time.sleep(wait)
             with yt_dlp.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(stream_url, download=True)
         else:

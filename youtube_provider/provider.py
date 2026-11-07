@@ -61,6 +61,7 @@ from .helpers import (
     search_channels,
     search_playlists,
     search_yt,
+    seconds_until_available,
 )
 from .parsers import parse_channel_as_artist, parse_playlist, parse_playlist_as_album, parse_track
 from .url_utils import resolve_youtube_search_target
@@ -334,6 +335,9 @@ class YouTubeProvider(MusicProvider):
             # is rejected by the download lock and ignored by the caller.
             self._schedule_background_cache(item_id, result)
 
+        if wait := seconds_until_available(result):
+            self.logger.debug("Waiting %.1fs until the stream of %s is available", wait, item_id)
+            await asyncio.sleep(wait)
         return self._build_vod_stream_details(item_id, result)
 
     def _build_vod_stream_details(

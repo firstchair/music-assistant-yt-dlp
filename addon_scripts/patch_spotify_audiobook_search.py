@@ -35,19 +35,48 @@ from ._fc_pathfinder import PathfinderClient as _FcPathfinderClient  # noqa: E40
 _fc_pathfinder = _FcPathfinderClient()
 
 
-async def _fc_load_audiobooks(provider: SpotifyProvider, ids: list[str]) -> list[Audiobook]:
-    # Not every Spotify account may load every audiobook (the Web API answers
-    # null/404 for some accounts). MA searches through one Spotify instance, so
-    # load what it cannot through the other Spotify instances.
-    candidates = [provider] + [
+# Countries where Spotify sells/streams audiobooks. An account from elsewhere
+# (e.g. Vietnam) can still read audiobook metadata, but playback fails with
+# "error audio key". Only used to rank instances, so a missing country just
+# means that instance is tried later.
+_FC_AUDIOBOOK_COUNTRIES = frozenset(
+    {
+        "US", "GB", "IE", "CA", "AU", "NZ",
+        "NL", "BE", "LU", "FR", "DE", "AT", "CH", "LI",
+        "DK", "SE", "NO", "FI", "IS", "EE", "LV", "LT",
+    }
+)
+
+
+def _fc_account_country(provider: SpotifyProvider) -> str:
+    user = getattr(provider, "_sp_user", None) or {}
+    return str(user.get("country") or "").upper()
+
+
+def _fc_can_play_audiobooks(provider: SpotifyProvider) -> bool:
+    return _fc_account_country(provider) in _FC_AUDIOBOOK_COUNTRIES
+
+
+def _fc_audiobook_instances(provider: SpotifyProvider) -> list[SpotifyProvider]:
+    # All Spotify instances that report audiobook support, the searching one
+    # first, then moved so accounts from audiobook countries come first: the
+    # instance that loads a book is the one MA plays it through.
+    instances = [provider] + [
         other
         for other in provider.mass.get_providers()
         if isinstance(other, SpotifyProvider)
         and other is not provider
         and other.audiobooks_supported
     ]
+    return sorted(instances, key=lambda inst: not _fc_can_play_audiobooks(inst))
+
+
+async def _fc_load_audiobooks(provider: SpotifyProvider, ids: list[str]) -> list[Audiobook]:
+    # Not every Spotify account may load or play every audiobook (the Web API
+    # answers null/404 for some, and accounts from countries without
+    # audiobooks fail at playback), so load through the best instances.
     loaded: dict[str, Audiobook] = {}
-    for candidate in candidates:
+    for candidate in _fc_audiobook_instances(provider):
         missing = [audiobook_id for audiobook_id in ids if audiobook_id not in loaded]
         if not missing:
             break
@@ -87,6 +116,12 @@ def _fc_patch_audiobook_search() -> None:
         if not media_types or MediaType.AUDIOBOOK not in media_types:
             return result
         if not self.audiobooks_supported:
+            return result
+        if not _fc_can_play_audiobooks(self) and any(
+            _fc_can_play_audiobooks(inst) for inst in _fc_audiobook_instances(self)
+        ):
+            # another instance can actually play audiobooks and runs this same
+            # search itself; adding them here too would only give duplicates
             return result
         try:
             books = await _fc_find_audiobooks(self, search_query, limit)

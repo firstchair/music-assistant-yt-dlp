@@ -121,6 +121,11 @@ def search_playlists(
     return [e for e in info.get("entries", []) if e][:limit]
 
 
+def _is_missing_channel_tab(err: Exception) -> bool:
+    """Return True when yt-dlp failed only because the channel lacks that tab."""
+    return "does not have a" in str(err) and "tab" in str(err)
+
+
 def extract_channel_videos(
     yt_dlp: Any, ydl_opts: dict[str, Any], channel_id: str, limit: int
 ) -> list[dict[str, Any]]:
@@ -138,7 +143,12 @@ def extract_channel_videos(
         "playlistend": limit,
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
-        info = ydl.extract_info(f"{YT_DOMAIN}/channel/{channel_id}/videos", download=False)
+        try:
+            info = ydl.extract_info(f"{YT_DOMAIN}/channel/{channel_id}/videos", download=False)
+        except yt_dlp.utils.DownloadError as err:
+            if _is_missing_channel_tab(err):
+                return []
+            raise
     if not info:
         return []
     return [e for e in info.get("entries", []) if e][:limit]
@@ -183,7 +193,12 @@ def extract_channel_playlists(
         "playlistend": limit,
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
-        info = ydl.extract_info(f"{YT_DOMAIN}/channel/{channel_id}/playlists", download=False)
+        try:
+            info = ydl.extract_info(f"{YT_DOMAIN}/channel/{channel_id}/playlists", download=False)
+        except yt_dlp.utils.DownloadError as err:
+            if _is_missing_channel_tab(err):
+                return []
+            raise
     if not info:
         return []
     return [e for e in info.get("entries", []) if e][:limit]
